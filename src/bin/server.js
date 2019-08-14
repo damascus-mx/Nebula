@@ -1,4 +1,5 @@
 import cluster  from 'cluster';
+import app from './app';
 
 if ( cluster.isMaster ) {
     const CPU_COUNT = require('os').cpus().length;
