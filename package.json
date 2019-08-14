@@ -6,13 +6,10 @@
   "scripts": {
     "start": "node ./bin/server",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "server": "babel-node ./src/bin/server",
-    "server:prod": "node ./dist/bin/server",
-    "dev": "SET NODE_ENV=development & npm-run-all server",
-    "clean": "rimraf dist",
-    "build": "babel ./src --out-dir dist",
-    "prod": "SET NODE_ENV=production & npm-run-all clean build server:prod",
-    "watch": "nodemon"
+    "dev": "ts-node-dev --respawn --transpileOnly ./src/bin/server.ts",
+    "prod": "tsc && node ./dist/bin/server.js",
+    "watch": "nodemon",
+    "tsc": "tsc"
   },
   "repository": {
     "type": "git",
@@ -31,10 +28,9 @@
     "rimraf": "^2.7.1"
   },
   "devDependencies": {
-    "@babel/cli": "^7.5.5",
-    "@babel/core": "^7.5.5",
-    "@babel/node": "^7.5.5",
-    "@babel/preset-env": "^7.5.5",
-    "nodemon": "^1.19.1"
+    "@types/express": "^4.17.0",
+    "nodemon": "^1.19.1",
+    "ts-node-dev": "^1.0.0-pre.40",
+    "typescript": "^3.5.3"
   }
 }
