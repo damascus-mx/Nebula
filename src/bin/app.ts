@@ -13,6 +13,7 @@ const app = express();
 const API_ROUTE = '/api/v1';
 
 // Routes import
+import { UserRoutes } from '../routes/user.routes';
 
 // Gzip compression
 app.use(compression());
@@ -44,6 +45,6 @@ app.use((req, res, next) => {
 });
 
 // Routes
-
+app.use(API_ROUTE, UserRoutes);
 
 export default app;
