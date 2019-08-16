@@ -1,9 +1,51 @@
-export class UserModel {
-    constructor(
-        username: string,
-        password: string,
-        name: string,
-        surname: string,
-        image: string
-    ) {}
+export interface UserModel {
+    id: number,
+    username: string,
+    password: string,
+    email: string,
+    name: string,
+    surname: string,
+    image?: string,
+    cover?: string,
+    bio?: string,
+    total_followers: number,
+    phone?: number,
+    location?: string,
+    city?: string,
+    country: string,
+    theme_hex?: string,
+    iat: Date,
+    role: string,
+    private: boolean,
+    verified: boolean,
+    confirmed: boolean,
+    active: boolean,
+    last_modification: Date
+}
+
+export function toModel(objectModel: any): UserModel {
+    return {
+        id:  Number(objectModel.id),
+        username: objectModel.username,
+        password: objectModel.password,
+        email: objectModel.email,
+        name: objectModel.name,
+        surname: objectModel.surname,
+        image: objectModel.image,
+        cover: objectModel.cover,
+        bio: objectModel.bio,
+        total_followers: Number(objectModel.total_followers),
+        phone: Number(objectModel.phone),
+        location: objectModel.location,
+        city: objectModel.city,
+        country: objectModel.country,
+        theme_hex: objectModel.theme_hex,
+        iat: new Date(objectModel.iat),
+        role: objectModel.role,
+        private: objectModel.private,
+        verified: objectModel.verified,
+        confirmed: objectModel.confirmed,
+        active: objectModel.active,
+        last_modification: new Date(objectModel.last_modification)
+    };
 }

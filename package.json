@@ -4,7 +4,7 @@
   "description": "Andromeda's platform API",
   "main": "server.js",
   "scripts": {
-    "start": "node ./bin/server",
+    "start": "node ./dist/bin/server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "ts-node-dev --respawn --transpileOnly ./src/bin/server.ts",
     "prod": "tsc && node ./dist/bin/server.js",
