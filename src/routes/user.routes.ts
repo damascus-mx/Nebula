@@ -1,14 +1,12 @@
-import { UserController } from '../controllers/user.controller'; 
 import express from 'express';
-import { UserRepository } from '../infrastructure/repositories/user.repository';
-
-const _userRepo = new UserRepository();
+import IUserController from '../core/controllers/user.controller';
+import { UserController } from '../controllers/user.controller';
 
 const api = express.Router();
-const controller = new UserController(_userRepo);
+const controller: IUserController = new UserController();
 
-api.post('/user', controller.CreateUser);
-api.get('/user', controller.GetUsers);
-api.get('/user/:id', controller.GetUser);
+api.post('/user', controller.Create);
+api.get('/user', controller.GetAll);
+api.get('/user/:id', controller.GetById);
 
 export const UserRoutes = api;

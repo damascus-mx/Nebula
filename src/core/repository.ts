@@ -1,4 +1,4 @@
-export interface Repository<T> {
+export interface IRepository<T> {
     Create(model: T): Promise<void>;
     Update(Id: any, payload: any): Promise<void>;
     Delete(Id: any): Promise<void>;

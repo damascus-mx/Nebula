@@ -1,10 +1,10 @@
-import { Repository } from "../../core/repository";
 import { UserModel, toModel } from "../../domain/models/user.model";
 import * as AWS from 'aws-sdk';
 import { Pool } from 'pg';
 import { PoolInstance } from "../pool";
+import IUserRepository from "../../core/repositories/user.repository";
 
-export class UserRepository implements Repository<UserModel> {
+export class UserRepository implements IUserRepository {
     private _Pool: Pool;
 
     constructor() {
@@ -25,20 +25,28 @@ export class UserRepository implements Repository<UserModel> {
     }
 
     GetById(Id: number): Promise<UserModel> {
-        return this._Pool.query(`SELECT * FROM CLIENT.GET_USER(${Id})`)
-                        .then(user => toModel(user.rows[0]))
-                        .catch(e => { throw e });
+        return this._Pool.connect()
+        .then(client => {
+            return client.query(`SELECT * FROM CLIENT.GET_USER(${Id})`)
+            .then(user => { client.release(); return toModel(user.rows[0]);})
+            .catch(e => { client.release(); return e; });
+        })
+        .catch( e => e );
     }
     
     GetAll(): Promise<UserModel[]> {
-        return this._Pool.query('SELECT * FROM CLIENT.USER_BY_FOLLOWERS()')
-                        .then(usersDB => {
-                            usersDB.rows.forEach((item, i) => {
-                                usersDB.rows[i] = toModel(item);
-                            });
-                            return usersDB.rows; 
-                        })
-                        .catch( e => { throw e });
-
+        return this._Pool.connect()
+        .then(client => {
+            return client.query('SELECT * FROM CLIENT.USER_BY_FOLLOWERS()')
+            .then(usersDB => {
+                client.release();
+                usersDB.rows.forEach((item, i) => {
+                    usersDB.rows[i] = toModel(item);
+                });
+                return usersDB.rows; 
+            })
+            .catch( e => { client.release(); return e; });
+        })
+        .catch( e => e);
     }
 }

@@ -1,4 +1,5 @@
 // Modules
+import "reflect-metadata";
 import cluster  from 'cluster';
 import { Pool } from 'pg';
 import dotenv from 'dotenv';
