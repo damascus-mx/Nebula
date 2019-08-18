@@ -1,16 +1,18 @@
 // Modules
+import "reflect-metadata";
 import cluster  from 'cluster';
-import { Pool } from 'pg';
 import dotenv from 'dotenv';
 // Custom Modules
 import app from './app';
 import { PoolInstance } from '../infrastructure/pool';
+import { Sequelize } from 'sequelize';
 
 // Start dotenv
 dotenv.config();
 
 // Start pool
-const pool: Pool = PoolInstance.getInstance();
+// const pool: Pool = PoolInstance.getInstance();
+const sequelize: Sequelize = PoolInstance.getInstance();
 
 const PORT = process.env.PORT || 5000;
 
@@ -26,6 +28,11 @@ if ( cluster.isMaster ) {
         cluster.fork();
     });
 } else {
-    // pool.query('SELECT NOW()').then(res => console.log(res.rows[0])).catch(e => console.log(e.message));
-    app.listen( PORT, () => { console.log(`Server running on port ${PORT}`); });
+    sequelize.authenticate()
+    .then(() => {
+        app.listen( PORT, () => { console.log(`Server running on port ${PORT}`); });
+    })
+    .catch( e => {
+        console.error(e.stack);
+    });
 }
