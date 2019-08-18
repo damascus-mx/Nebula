@@ -13,11 +13,11 @@ export class UserRepository implements IUserRepository {
         .catch(e => e);
     }    
 
-    Update(Id: number, payload: any): any {
+    Update(Id: number, payload: any): Promise<void> {
         throw new Error("Method not implemented.");
     }
 
-    Delete(Id: number): any {
+    Delete(Id: number): Promise<void> {
         User.startModel();
         return User.destroy({where:{ id: Id }})
         .then(user => user)

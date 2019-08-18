@@ -3,6 +3,7 @@ import IUserController from "../core/controllers/user.controller";
 import { UserRepository } from "../infrastructure/repositories/user.repository";
 import IUserRepository from "../core/repositories/user.repository";
 import { IUser } from "../domain/models/user.model";
+import { SHA3 } from 'crypto-js';
 
 export class UserController implements IUserController {
     private static _userRepository: IUserRepository;
@@ -19,9 +20,11 @@ export class UserController implements IUserController {
                 !payload.name  || !payload.surname || !payload.country )
             return res.status(400).send({message: MISSING_FIELDS});
 
+            const cipherText = await SHA3(payload.password).toString();
+
             const user: IUser = {
                 username: payload.username.toLowerCase(),
-                password: payload.password,
+                password: cipherText,
                 email: payload.email.toLowerCase(),
                 name: payload.name,
                 surname: payload.surname,
@@ -30,7 +33,6 @@ export class UserController implements IUserController {
 
             UserController._userRepository.Create(user)
             .then((response: any) => {
-                console.log(response);
                 return !response.errors ? res.status(200).send({user: response.User.dataValues}) : res.status(400).send({message: response.errors[0].message});
             })
             .catch(e => e);
@@ -49,7 +51,6 @@ export class UserController implements IUserController {
             if (req.params.id )
             UserController._userRepository.Delete(req.params.id)
             .then((response: any) => {
-                console.log(response);
                 return response > 0 ? res.status(200).send({message: 'User deleted'}) : res.status(400).send({message: 'User not found'});
             })
             .catch( e => e);
