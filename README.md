@@ -6,4 +6,4 @@
  [![GitHub stars](https://img.shields.io/github/stars/damascus-mx/Nebula.svg?style=social&label=Star)](https://github.com/damascus-mx/Nebula) 
 
 
-Damascus IT's Nebula is the main API powered by NodeJS using RESTful / Websocket technology to proccess Andromeda's data
+Damascus' Nebula is the main API powered by NodeJS using RESTful / Websocket technology to proccess Andromeda's data
