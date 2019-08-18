@@ -31,11 +31,8 @@ export class UserController implements IUserController {
                 country: payload.country.toLowerCase()
             };
 
-            UserController._userRepository.Create(user)
-            .then((response: any) => {
-                return !response.errors ? res.status(200).send({user: response.User.dataValues}) : res.status(400).send({message: response.errors[0].message});
-            })
-            .catch(e => e);
+            const response: any = await UserController._userRepository.Create(user);
+            !response.errors ? res.status(200).send({user: response.User.dataValues}) : res.status(400).send({message: response.errors[0].message});
         } catch (error) {
             res.status(500).send({message: GENERIC_ERROR, error: error.message});
         }
@@ -43,17 +40,21 @@ export class UserController implements IUserController {
     }
 
     async Update(req: any, res: any) {
-        throw new Error("Method not implemented.");
+        try {
+            const payload = req.body;
+
+            const response: any = await UserController._userRepository.Update(req.params.id, payload);
+
+            !response.errors ? res.status(200).send({message: 'User updated'}) : res.status(400).send({message: response.errors[0].message});
+        } catch (error) {
+            res.status(500).send({message: GENERIC_ERROR, error: error.message});
+        }
     }
 
     async Delete(req: any, res: any) {
         try {
-            if (req.params.id )
-            UserController._userRepository.Delete(req.params.id)
-            .then((response: any) => {
-                return response > 0 ? res.status(200).send({message: 'User deleted'}) : res.status(400).send({message: 'User not found'});
-            })
-            .catch( e => e);
+            const response: any = await UserController._userRepository.Delete(req.params.id);
+            response > 0 ? res.status(200).send({message: 'User deleted'}) : res.status(400).send({message: 'User not found'});
         } catch (error) {
             res.status(500).send({message: GENERIC_ERROR, error: error.message});
         }

@@ -14,7 +14,10 @@ export class UserRepository implements IUserRepository {
     }    
 
     Update(Id: number, payload: any): Promise<void> {
-        throw new Error("Method not implemented.");
+        User.startModel();
+        return User.update(payload, {where: { id: Id }})
+        .then(user => user)
+        .catch(e => e);
     }
 
     Delete(Id: number): Promise<void> {
