@@ -43,19 +43,19 @@ INSERT INTO client.users (USERNAME, PASSWORD, EMAIL, NAME, SURNAME, BIO, TOTAL_F
 				  PRIVATE, VERIFIED, CONFIRMED, ACTIVE) 
 VALUES (
 	'aruizmx', 'caca123', 'luis.alonso.16@hotmail.com', 'Alonso', 'R', 'Entrepreneur', 
-	1452690, 526141592623, 'Chihuahua', 'MX', '01579b', '2019-06-01', 'ROLE_ADMIN', FALSE, TRUE,
+	1452690, 526141592623, 'Chihuahua', 'mx', '01579b', '2019-06-01', 'ROLE_ADMIN', FALSE, TRUE,
 	TRUE, TRUE
 ), (
 	'hiramuzl', 'caca123', 'hiram.feo@outlook.com', 'Hiram', 'Muñoz', 'Dentista esclavo', 
-	2574, 521845816, 'Las Vegas', 'US', '00bfa5', '2019-08-01', 'ROLE_USER', TRUE, FALSE,
+	2574, 521845816, 'Las Vegas', 'us', '00bfa5', '2019-08-01', 'ROLE_USER', TRUE, FALSE,
 	TRUE, TRUE
 ), (
 	'br1arevalo', 'caca10', 'el.bruno@hotmail.com', 'Bruno', 'Arevalo', 'Love cats <3', 
-	2580, 526148526932, 'Chihuahua', 'MX', '01579b', '2019-07-09', 'ROLE_SUPPORT', TRUE, FALSE,
+	2580, 526148526932, 'Chihuahua', 'mx', '01579b', '2019-07-09', 'ROLE_SUPPORT', TRUE, FALSE,
 	TRUE, TRUE
 ), (
 	'checheriv', 'caca10', 'jose.rivera69@outlook.com', 'Jose', 'Rivera', 'Viernes de ahorcar rucas', 
-	9852465, 526145236987, 'Mexico City', 'MX', '00bfa5', '2019-01-30', 'ROLE_USER', FALSE, TRUE,
+	9852465, 526145236987, 'Mexico City', 'mx', '00bfa5', '2019-01-30', 'ROLE_USER', FALSE, TRUE,
 	FALSE, TRUE
 );
 
