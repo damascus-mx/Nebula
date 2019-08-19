@@ -23,10 +23,9 @@ export default () => {
      * Sign in using username and password.
      */
     passport.use(new LocalStrategy((username, password, done) => {
-        _userRepository.FindOne(Sequelize.or({ username: username.toLowerCase() }, { email: username.toLowerCase() })).then(user => {
+        _userRepository.FindOne(Sequelize.or({ username: username.toLowerCase() }, { email: username.toLowerCase() })).then(async (user) => {
             if (!user) return done(undefined, false, { message: 'User not found' })
-    
-            return AuthService.verifyPassword(password, user.password) ? done(undefined, user) : done(undefined, false, { message: "Invalid username or password." });
+            return await AuthService.verifyPassword(password, user.password) ? done(undefined, user) : done(undefined, false, { message: "Invalid username or password." });
         })
         .catch(e => done(e));
     }));

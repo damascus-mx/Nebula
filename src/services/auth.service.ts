@@ -1,8 +1,10 @@
-import { SHA3 } from 'crypto-js';
+import bcrypt from 'bcryptjs';
 
 export abstract class AuthService {
 
-    public static verifyPassword(password: string, cipher: string): boolean {
-        return SHA3(password).toString() === cipher ? true : false;
+    public static async verifyPassword(password: string, cipher: string): Promise<boolean> {
+        return bcrypt.compare(password, cipher)
+        .then(result => result)
+        .catch(e => false);
     }
 }

@@ -10,11 +10,10 @@ import IUserRepository from "../core/repositories/user.repository";
 
 // Auth
 // - Cryptographic
-import { SHA3 } from 'crypto-js';
+import bcrypt from 'bcryptjs';
 import { AuthService } from "../services/auth.service";
 import passport = require("passport");
 import { IVerifyOptions } from "passport-local";
-import { NextFunction } from "express";
 
 export class UserController implements IUserController {
     private static _userRepository: IUserRepository;
@@ -31,7 +30,7 @@ export class UserController implements IUserController {
                 !payload.name  || !payload.surname || !payload.country )
             return res.status(400).send({message: MISSING_FIELDS});
 
-            const cipherText = await SHA3(payload.password).toString();
+            const cipherText = await bcrypt.hash(payload.password, 10);
 
             const user: IUser = {
                 username: payload.username.toLowerCase(),
@@ -43,7 +42,7 @@ export class UserController implements IUserController {
             };
 
             const response: any = await UserController._userRepository.Create(user);
-            !response.errors ? res.status(200).send({user: response.User}) : res.status(400).send({message: response.errors[0].message});
+            !response.errors ? res.status(200).send({user: response}) : res.status(400).send({message: response.errors[0].message});
         } catch (error) {
             res.status(500).send({message: GENERIC_ERROR, error: error.message});
         }
@@ -54,6 +53,7 @@ export class UserController implements IUserController {
         try {
             const payload = req.body;
             if ( isNaN(Number(req.params.id)) ) return res.status(404).send({message: INVALID_ID});
+            if (payload.password) return res.status(403).send({message: 'This action is not allowed. Consider using Change Password endpoint.'});
 
             payload.username = payload.username.toLowerCase();
             payload.email = payload.email.toLowerCase();
@@ -122,8 +122,9 @@ export class UserController implements IUserController {
             if (!user) return res.status(404).send({message: `User ${NOT_FOUND}`});
             if ( payload.old === payload.new_password ) return res.status(400).send({message: 'New password must be different'});
 
-            if ( AuthService.verifyPassword(payload.old_password, user.password) ) {
-                UserController._userRepository.Update(user.id, {password: SHA3(payload.new_password).toString()});
+            if ( await AuthService.verifyPassword(payload.old_password, user.password) ) {
+                const cipherText = await bcrypt.hash(payload.new_password, 10);
+                UserController._userRepository.Update(user.id, {password: cipherText});
                 return res.status(200).send({message: user});
             }
 
