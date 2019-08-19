@@ -11,4 +11,8 @@ api.delete('/user/:id', controller.Delete);
 api.get('/user', controller.GetAll);
 api.get('/user/:id', controller.GetById);
 
+// Auth
+api.post('/auth/user', controller.LogIn);
+api.put('/auth/user/:id', controller.ChangePassword);
+
 export const UserRoutes = api;
