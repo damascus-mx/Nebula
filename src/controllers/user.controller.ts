@@ -1,9 +1,20 @@
+// Required libs
 import { GENERIC_ERROR, MISSING_FIELDS, NOT_FOUND, DELETED_FIELD, UPDATED_FIELD, FAILED_AUTH, INVALID_ID } from "../common/config/app.config";
+import { Request, Response } from "express-serve-static-core";
+// Interfaces
 import IUserController from "../core/controllers/user.controller";
+import { IUser } from "../domain/models/user.model";
+// Repository
 import { UserRepository } from "../infrastructure/repositories/user.repository";
 import IUserRepository from "../core/repositories/user.repository";
-import { IUser } from "../domain/models/user.model";
+
+// Auth
+// - Cryptographic
 import { SHA3 } from 'crypto-js';
+import { AuthService } from "../services/auth.service";
+import passport = require("passport");
+import { IVerifyOptions } from "passport-local";
+import { NextFunction } from "express";
 
 export class UserController implements IUserController {
     private static _userRepository: IUserRepository;
@@ -12,7 +23,7 @@ export class UserController implements IUserController {
         UserController._userRepository = new UserRepository();
     }
 
-    async Create(req: any, res: any) {
+    async Create(req: Request, res: Response) {
         try {
             const payload = req.body;
 
@@ -39,10 +50,13 @@ export class UserController implements IUserController {
 
     }
 
-    async Update(req: any, res: any) {
+    async Update(req: Request, res: Response) {
         try {
             const payload = req.body;
             if ( isNaN(Number(req.params.id)) ) return res.status(404).send({message: INVALID_ID});
+
+            payload.username = payload.username.toLowerCase();
+            payload.email = payload.email.toLowerCase();
 
             const response: any = await UserController._userRepository.Update(req.params.id, payload);
 
@@ -52,7 +66,7 @@ export class UserController implements IUserController {
         }
     }
 
-    async Delete(req: any, res: any) {
+    async Delete(req: Request, res: Response) {
         try {
             if ( isNaN(Number(req.params.id)) ) return res.status(404).send({message: INVALID_ID});
             const response: any = await UserController._userRepository.Delete(req.params.id);
@@ -62,7 +76,7 @@ export class UserController implements IUserController {
         }
     }
 
-    async GetAll(req: any, res: any) {
+    async GetAll(req: Request, res: Response) {
         try {
             const users = await UserController._userRepository.GetAll();
             users && users.length > 0 ? res.status(200).send({users: users}) : res.status(404).send({message: `User ${NOT_FOUND}`});
@@ -71,7 +85,7 @@ export class UserController implements IUserController {
         }
     }
 
-    async GetById(req: any, res: any) {
+    async GetById(req: Request, res: Response) {
         try {
             const users = await UserController._userRepository.GetById(req.params.id);
             users ? res.status(200).send({users: users}) : res.status(404).send({message: `User ${NOT_FOUND}`});
@@ -80,16 +94,27 @@ export class UserController implements IUserController {
         }
     }
 
-    async LogIn(req: any, res: any) {
+    async LogIn(req: Request, res: Response) {
         try {
             const payload = req.body;
-            if ( !payload.user || !payload.password ) return res.status(404).send({message: MISSING_FIELDS});
+            if ( !payload.username || !payload.password ) return res.status(404).send({message: MISSING_FIELDS});
+
+            return passport.authenticate("local", (err: Error, user: IUser, info: IVerifyOptions) => {
+                if (err) res.status(400).send({message: GENERIC_ERROR, error: err.message});
+
+                if (!user) return res.status(404).send({message: FAILED_AUTH});
+
+                return res.status(200).send({message: user});
+            })(req, res);
+            
+            // res.status(400).send({message: GENERIC_ERROR});
+            
         } catch (error) {
             res.status(400).send({message: GENERIC_ERROR, error: error.message});
         }
     }
     
-    async ChangePassword(req: any, res: any) {
+    async ChangePassword(req: Request, res: Response) {
         try {
             const payload = req.body;
             if ( !req.params.id || isNaN(Number(req.params.id)) ) return res.status(404).send({message: INVALID_ID});
@@ -99,7 +124,7 @@ export class UserController implements IUserController {
             if (!user) return res.status(404).send({message: `User ${NOT_FOUND}`});
             if ( payload.old === payload.new_password ) return res.status(400).send({message: 'New password must be different'});
 
-            if ( user.password === SHA3(payload.old_password).toString() ) {
+            if ( AuthService.verifyPassword(payload.old_password, user.password) ) {
                 UserController._userRepository.Update(user.id, {password: SHA3(payload.new_password).toString()});
                 return res.status(200).send({message: user});
             }

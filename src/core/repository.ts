@@ -4,4 +4,6 @@ export interface IRepository<T> {
     Delete(Id: any): Promise<void>;
     GetById(Id: any): Promise<T>;
     GetAll(): Promise<T[]>;
+    FindOne(args?: any): Promise<T>;
+    FindMany(args?:any): Promise<T[]>;
 }

@@ -40,4 +40,18 @@ export class UserRepository implements IUserRepository {
         .then(users => users)
         .catch(e => e);
     }
+
+    FindOne(args?: any): Promise<User> {
+        User.startModel();
+        return User.findOne({raw: true, where: args })
+        .then(user => user)
+        .catch(e => e);
+    }
+
+    FindMany(args?: any): Promise<User[]> {
+        User.startModel();
+        return User.findAll({raw: true, where: args })
+        .then(user => user)
+        .catch(e => e);
+    }
 }

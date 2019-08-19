@@ -6,11 +6,18 @@ import morgan from 'morgan';
 import * as rfs from 'rotating-file-stream';
 import * as fs from 'fs';
 import * as path from 'path';
+import lusca from "lusca";
+import passport from "passport";
+import flash from 'express-flash';
+import session from 'express-session';
+
 // Custom libs
+// API keys and Passport configuration
 
 // Const
 const app = express();
 const API_ROUTE = '/api/v1';
+const SECRET = process.env.ENCRYPT_KEY;
 
 // Routes import
 import { UserRoutes } from '../routes/user.routes';
@@ -32,6 +39,14 @@ const accessLogStream = rfs.default(
     }
 );
 app.use(morgan("combined", { stream: accessLogStream }));
+
+// Passport Auth
+app.use(passport.initialize());
+require('../common/config/passport.config')(passport);
+
+// LUSCA
+app.use(lusca.xframe("SAMEORIGIN"));
+app.use(lusca.xssProtection(true));
 
 // CORS
 // TODO - Change public policy to AWS Cloudfront/VPC
