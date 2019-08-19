@@ -10,12 +10,12 @@ const LocalStrategy = passportLocal.Strategy;
 const FacebookStrategy = passportFacebook.Strategy;
 const _userRepository = new UserRepository();
 
-module.exports = (passport: any) => {
-    passport.serializeUser((user: any, done: any) => {
+export default () => {
+    passport.serializeUser<any, any>((user, done) => {
         done(undefined, user.id);
     });
     
-    passport.deserializeUser((id: any, done: any) => {
+    passport.deserializeUser((id: any, done) => {
         _userRepository.GetById(id).then(user => done(null, user)).catch(e => done(e, false));
     });
     

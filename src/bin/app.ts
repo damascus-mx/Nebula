@@ -8,11 +8,9 @@ import * as fs from 'fs';
 import * as path from 'path';
 import lusca from "lusca";
 import passport from "passport";
-import flash from 'express-flash';
-import session from 'express-session';
 
 // Custom libs
-// API keys and Passport configuration
+import * as passportConfig from '../common/config/passport.config';
 
 // Const
 const app = express();
@@ -42,7 +40,7 @@ app.use(morgan("combined", { stream: accessLogStream }));
 
 // Passport Auth
 app.use(passport.initialize());
-require('../common/config/passport.config')(passport);
+passportConfig.default();
 
 // LUSCA
 app.use(lusca.xframe("SAMEORIGIN"));

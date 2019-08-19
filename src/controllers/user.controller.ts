@@ -43,7 +43,7 @@ export class UserController implements IUserController {
             };
 
             const response: any = await UserController._userRepository.Create(user);
-            !response.errors ? res.status(200).send({user: response.User.dataValues}) : res.status(400).send({message: response.errors[0].message});
+            !response.errors ? res.status(200).send({user: response.User}) : res.status(400).send({message: response.errors[0].message});
         } catch (error) {
             res.status(500).send({message: GENERIC_ERROR, error: error.message});
         }
@@ -99,15 +99,13 @@ export class UserController implements IUserController {
             const payload = req.body;
             if ( !payload.username || !payload.password ) return res.status(404).send({message: MISSING_FIELDS});
 
-            return passport.authenticate("local", (err: Error, user: IUser, info: IVerifyOptions) => {
+            passport.authenticate("local", (err: Error, user: IUser, info: IVerifyOptions) => {
                 if (err) res.status(400).send({message: GENERIC_ERROR, error: err.message});
 
                 if (!user) return res.status(404).send({message: FAILED_AUTH});
 
                 return res.status(200).send({message: user});
             })(req, res);
-            
-            // res.status(400).send({message: GENERIC_ERROR});
             
         } catch (error) {
             res.status(400).send({message: GENERIC_ERROR, error: error.message});
