@@ -104,9 +104,9 @@ export class UserController implements IUserController {
 
                 if (!user) return res.status(404).send({message: FAILED_AUTH});
 
-                return res.status(200).send({message: user});
+                return res.status(200).send({user: user});
             })(req, res);
-            
+
         } catch (error) {
             res.status(400).send({message: GENERIC_ERROR, error: error.message});
         }

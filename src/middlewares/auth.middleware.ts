@@ -1,4 +1,5 @@
-import { NextFunction, Request, Response } from "express-serve-static-core";
+import { NextFunction, Request, Response } from "express";
+import _ from "lodash";
 
 /**
  * Login Required middleware.
@@ -7,7 +8,7 @@ export const isAuthenticated = (req: Request, res: Response, next: NextFunction)
     if (req.isAuthenticated()) {
         return next();
     }
-    res.redirect("/login");
+    res.status(403).send({message: 'Session expired'});
 };
 
 /**
@@ -19,6 +20,6 @@ export const isAuthorized = (req: Request, res: Response, next: NextFunction) =>
     if (_.find(req.user.tokens, { kind: provider })) {
         next();
     } else {
-        res.redirect(`/auth/${provider}`);
+        res.status(401).send({message: 'Unauthorized'});
     }
 };

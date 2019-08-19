@@ -128,13 +128,16 @@ export class User extends Model implements IUser {
                 defaultValue: true
             },
             verified: {
-                type: DataTypes.BOOLEAN
+                type: DataTypes.BOOLEAN,
+                defaultValue: false
             },
             confirmed: {
-                type: DataTypes.BOOLEAN
+                type: DataTypes.BOOLEAN,
+                defaultValue: false
             },
             active: {
-                type: DataTypes.BOOLEAN
+                type: DataTypes.BOOLEAN,
+                defaultValue: true
             },
             created_at: {
                 type: DataTypes.DATE,
