@@ -15,7 +15,6 @@ import * as passportConfig from '../common/config/passport.config';
 // Const
 const app = express();
 const API_ROUTE = '/api/v1';
-const SECRET = process.env.ENCRYPT_KEY;
 
 // Routes import
 import { UserRoutes } from '../routes/user.routes';

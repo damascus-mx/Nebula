@@ -18,6 +18,8 @@ export interface IUser {
     country: string,
     theme_hex?: string | null,
     role?: string,
+    domain?: string | null,
+    oauth_id?: string | null,
     private?: boolean,
     verified?: boolean,
     confirmed?: boolean,
@@ -43,6 +45,8 @@ export class User extends Model implements IUser {
     public country!: string;
     public theme_hex?: string | null;
     public role!: string;
+    public domain?: string | null;
+    public oauth_id?: string | null;
     public private!: boolean
     public verified!: boolean;
     public confirmed!: boolean;
@@ -82,11 +86,11 @@ export class User extends Model implements IUser {
                 allowNull: false
             },
             image: {
-                type: DataTypes.STRING(255),
+                type: DataTypes.TEXT,
                 allowNull: true
             },
             cover: {
-                type: DataTypes.STRING(255),
+                type: DataTypes.TEXT,
                 allowNull: true
             },
             bio: {
@@ -122,6 +126,15 @@ export class User extends Model implements IUser {
                 type: DataTypes.STRING(50),
                 defaultValue: 'ROLE_USER',
                 allowNull: false
+            },
+            domain: {
+                type: DataTypes.STRING(255),
+                allowNull: true
+            },
+            oauth_id: {
+                type: DataTypes.TEXT,
+                allowNull: true,
+                unique: true
             },
             private: {
                 type: DataTypes.BOOLEAN,

@@ -1,6 +1,8 @@
 // Required libs
 import { GENERIC_ERROR, MISSING_FIELDS, NOT_FOUND, DELETED_FIELD, UPDATED_FIELD, FAILED_AUTH, INVALID_ID } from "../common/config/app.config";
-import { Request, Response } from "express-serve-static-core";
+import { Request, Response } from "express";
+import { check, sanitize, validationResult } from "express-validator";
+
 // Interfaces
 import IUserController from "../core/controllers/user.controller";
 import { IUser } from "../domain/models/user.model";
@@ -30,6 +32,14 @@ export class UserController implements IUserController {
                 !payload.name  || !payload.surname || !payload.country )
             return res.status(400).send({message: MISSING_FIELDS});
 
+            check("email", 'Email is not valid').isEmail();
+            check("password", 'Password cannot be blank').isLength({min: 1});
+            sanitize("email").normalizeEmail({ gmail_remove_dots: false });
+
+            const errors = validationResult(req);
+
+            if(!errors.isEmpty()) return res.status(400).send({errors: errors.array()});
+
             const cipherText = await bcrypt.hash(payload.password, 10);
 
             const user: IUser = {
@@ -55,6 +65,8 @@ export class UserController implements IUserController {
             if ( isNaN(Number(req.params.id)) ) return res.status(404).send({message: INVALID_ID});
             if (payload.password) return res.status(403).send({message: 'This action is not allowed. Consider using Change Password endpoint.'});
 
+            sanitize("email").normalizeEmail({ gmail_remove_dots: false });
+
             payload.username = payload.username.toLowerCase();
             payload.email = payload.email.toLowerCase();
 
@@ -79,7 +91,7 @@ export class UserController implements IUserController {
     async GetAll(req: Request, res: Response) {
         try {
             const users = await UserController._userRepository.GetAll();
-            users && users.length > 0 ? res.status(200).send({users: users}) : res.status(404).send({message: `User ${NOT_FOUND}`});
+            users && users.length > 0 ? res.status(200).send({users: users}) : res.status(404).send({message: `Users ${NOT_FOUND}`});
         } catch (error) {
             res.status(400).send({message: GENERIC_ERROR, error: error.message});
         }
@@ -99,7 +111,7 @@ export class UserController implements IUserController {
             const payload = req.body;
             if ( !payload.username || !payload.password ) return res.status(404).send({message: MISSING_FIELDS});
 
-            passport.authenticate("local", (err: Error, user: IUser, info: IVerifyOptions) => {
+            passport.authenticate("local", {session: false}, (err: Error, user: IUser, info: IVerifyOptions) => {
                 if (err) res.status(400).send({message: GENERIC_ERROR, error: err.message});
 
                 if (!user) return res.status(404).send({message: FAILED_AUTH});
@@ -130,6 +142,28 @@ export class UserController implements IUserController {
 
             return res.status(400).send({message: FAILED_AUTH});
 
+        } catch (error) {
+            res.status(400).send({message: GENERIC_ERROR, error: error.message});
+        }
+    }
+
+    async Facebook(req: Request, res: Response) {
+        try {
+            passport.authenticate('facebook', { scope: ['email', 'public_profile'] } )(req, res);
+        } catch (error) {
+            res.status(400).send({message: GENERIC_ERROR, error: error.message});
+        }
+    }
+
+    async FacebookCallback(req: Request, res: Response) {
+        try {
+            passport.authenticate('facebook', {session: false}, (err: Error, user: IUser, info: IVerifyOptions) => {
+                if (err) res.status(400).send({message: GENERIC_ERROR, error: err.message});
+
+                if (!user) return res.status(404).send({message: FAILED_AUTH});
+
+                return res.status(200).send({user: user});
+            })(req, res);
         } catch (error) {
             res.status(400).send({message: GENERIC_ERROR, error: error.message});
         }
