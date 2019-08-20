@@ -13,8 +13,8 @@ api.get('/user', controller.GetAll);
 api.get('/user/:id', controller.GetById);
 
 // Auth
-api.post('/auth/user', controller.LogIn);
-api.put('/auth/user/:id', controller.ChangePassword);
+api.post('/account/user', controller.LogIn);
+api.put('/account/user/:id', controller.ChangePassword);
 
 // User related
 api.get('/testing/user', isAuthenticated, controller.GetAll);

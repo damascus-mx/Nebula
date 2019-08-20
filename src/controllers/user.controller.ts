@@ -67,8 +67,8 @@ export class UserController implements IUserController {
 
             sanitize("email").normalizeEmail({ gmail_remove_dots: false });
 
-            payload.username = payload.username.toLowerCase();
-            payload.email = payload.email.toLowerCase();
+            if (payload.username)   payload.username = payload.username.toLowerCase();
+            if (payload.email)  payload.email = payload.email.toLowerCase();
 
             const response: any = await UserController._userRepository.Update(req.params.id, payload);
 
@@ -146,6 +146,10 @@ export class UserController implements IUserController {
             res.status(400).send({message: GENERIC_ERROR, error: error.message});
         }
     }
+
+    /**
+     * OAuth2 Helpers / Callbacks
+     */
 
     async Facebook(req: Request, res: Response) {
         try {
