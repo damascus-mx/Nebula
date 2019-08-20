@@ -1,12 +1,18 @@
-/**
- * @name Nebula for Andromeda
- * @version 0.0.1a
- * @copyright Damascus. 2019 All rights reserved.
- * @license Confidential This file belongs to Damascus IT intellectual property,
- * any unauthorized distribution of this file will be punished by law.
- * @author Alonso Ruiz
- * @description Main Nebula/Andromeda SQL Script
- */
+/******************************
+**	File:	nebula.sql
+**	Name:	Nebula
+**	Desc:	Nebula's cluster SQL script
+**	Auth:	Damascus Engineering
+**	Date:	2019
+**	Lisc:	Confidential - Closed
+**	Copy:	Damascus Engineering. 2019 All rights reserved.
+**************************
+** Change History
+**************************
+** PR   Date        Author  		Description 
+** --   --------   -------   		------------------------------------
+** 1    08/15/2019      Alonso R      Initial setup
+*******************************/
  
 -- Create schemas
 CREATE SCHEMA IF NOT EXISTS client;

@@ -1,3 +1,13 @@
+/**
+ * @name Nebula
+ * @version 0.0.1a
+ * @copyright Damascus Engineering. 2019 All rights reserved.
+ * @license Confidential This file belongs to Damascus Engineering intellectual property,
+ * any unauthorized distribution of this file will be punished by law.
+ * @author Alonso Ruiz
+ * @description Exports app static vars
+ */
+
 export const ENCRYPT_KEY = process.env.ENCRYPT_KEY;
 export const GENERIC_ERROR = 'Something went wrong';
 export const MISSING_FIELDS = 'Missing required fields';

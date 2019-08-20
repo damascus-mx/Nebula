@@ -1,21 +1,28 @@
+/**
+ * @name Nebula
+ * @version 0.0.1a
+ * @copyright Damascus Engineering. 2019 All rights reserved.
+ * @license Confidential This file belongs to Damascus Engineering intellectual property,
+ * any unauthorized distribution of this file will be punished by law.
+ * @author Alonso Ruiz
+ * @description Initialize Express server - AWS RDS
+ */
+
 // Modules
 import "reflect-metadata";
 import cluster  from 'cluster';
 import dotenv from 'dotenv';
+
 // Custom Modules
 import app from './app';
 import { PoolInstance } from '../infrastructure/pool';
 import { Sequelize } from 'sequelize';
-import { createServer } from 'oauth2orize';
 
 // Start dotenv
 dotenv.config();
 
 // Start pool
 const sequelize: Sequelize = PoolInstance.getInstance();
-
-// Start OAuth server
-const oauthServer =  createServer();
 
 const PORT = process.env.PORT || 5000;
 
