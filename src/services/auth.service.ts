@@ -92,14 +92,17 @@ export abstract class AuthService {
     
                     try {
                         const response: any = await this._userRepository.Create(newUser);
-                        const token: IToken = {
-                            kind: provider,
-                            access_token: accessToken,
-                            fk_user: response.id || 0
-                        };
-                        this._tokenRepository.Create(token);
-    
-                        !response.errors ? done(null, response) : done(response.errors[0], null);
+
+                        if ( !response.errors ) {
+                            const token: IToken = {
+                                kind: provider,
+                                access_token: accessToken,
+                                fk_user: response.id || 0
+                            };
+                            this._tokenRepository.Create(token).then(token => done(null, response) ).catch(e => new Error(e));
+                            
+                        } else done(response.errors[0], null);
+
                     } catch (error) {
                         throw new Error(error);
                     }

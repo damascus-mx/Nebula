@@ -10,6 +10,7 @@
 
 import { Model, DataTypes } from 'sequelize';
 import { PoolInstance } from '../../infrastructure/pool';
+import { Token } from './token.model';
 
 export interface IUser {
     id?: number,
@@ -177,6 +178,6 @@ export class User extends Model implements IUser {
             tableName: 'users',
             timestamps: false,
             sequelize: PoolInstance.getInstance()
-         });
+        });
     }
 }
