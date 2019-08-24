@@ -51,10 +51,58 @@ export abstract class AuthService {
 
         try {
             const user = await this._userRepository.FindOne({oauth_id: profile.id});
-    
-            // Logged
+
             if (req.user) {
+                if (user) {
+                    if ( user.id === req.user.id ) {
+                        try {
+                            const lastToken = await this._tokenRepository.GetById(user.id);
+        
+                            const token: IToken = {
+                                kind: provider,
+                                access_token: accessToken,
+                                fk_user: user.id || 0
+                            }
+        
+                            return lastToken ?  this._tokenRepository.Update(lastToken.id, token).then(token => done(null, user)).catch(e => done(e, null)) : 
+                            this._tokenRepository.Create(token).then(token => done(null, user) ).catch(e => done(e, null));
+        
+                        } catch (error) {
+                            throw new Error(error);
+                        }
+                    } else {
+                        throw new Error(`${provider} account is already associated with another account`);
+                    }
+                }
+                else {
+                    let custom_image = null;
+                    if (provider === 'facebook') custom_image = `https://graph.facebook.com/${profile.id}/picture?type=large`;
+                    
+                    const newUser: any = {
+                        name: profile.name.givenName,
+                        surname: profile.name.familyName,
+                        image: custom_image || profile.photos[0].value,
+                        domain: provider,
+                        oauth_id: profile.id
+                    }
     
+                    try {
+                        const response: any = await this._userRepository.Update(req.user.id, newUser);
+
+                        if ( !response.errors ) {
+                            const token: IToken = {
+                                kind: provider,
+                                access_token: accessToken,
+                                fk_user: response.id || 0
+                            };
+                            this._tokenRepository.Create(token).then(token => done(null, response) ).catch(e => new Error(e));
+                            
+                        } else done(response.errors[0], null);
+
+                    } catch (error) {
+                        throw new Error(error);
+                    }
+                }
             } else {       
                 if (user) {
     
