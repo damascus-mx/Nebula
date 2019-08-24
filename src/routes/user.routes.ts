@@ -30,5 +30,7 @@ api.put('/account/user/:id', controller.ChangePassword);
 api.get('/testing/user', isAuthenticated, controller.GetAll);
 api.get('/connect/facebook', controller.Facebook);
 api.get('/connect/facebook/callback', controller.FacebookCallback);
+api.get('/connect/google', controller.Google);
+api.get('/connect/google/callback', controller.GoogleCallback);
 
 export const UserRoutes = api;

@@ -16,4 +16,6 @@ export default interface IUserController extends IController {
     ChangePassword(req: Request, res: Response): any;
     Facebook(req: Request, res: Response): any;
     FacebookCallback(req: Request, res: Response): any;
+    Google(req: Request, res: Response): any;
+    GoogleCallback(req: Request, res: Response): any;
 }

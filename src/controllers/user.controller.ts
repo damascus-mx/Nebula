@@ -172,7 +172,29 @@ export class UserController implements IUserController {
     async FacebookCallback(req: Request, res: Response) {
         try {
             passport.authenticate('facebook', {session: false}, (err: Error, user: IUser, info: IVerifyOptions) => {
-                if (err) res.status(400).send({message: GENERIC_ERROR, error: err.message});
+                if (err) return res.status(400).send({message: GENERIC_ERROR, error: err.message});
+
+                if (!user) return res.status(404).send({message: FAILED_AUTH});
+
+                return res.status(200).send({user: user});
+            })(req, res);
+        } catch (error) {
+            res.status(400).send({message: GENERIC_ERROR, error: error.message});
+        }
+    }
+
+    async Google(req: Request, res: Response) {
+        try {
+            passport.authenticate('google', {session: false, scope: ['profile', 'email']})(req, res);
+        } catch (error) {
+            res.status(400).send({message: GENERIC_ERROR, error: error.message});
+        }
+    }
+
+    async GoogleCallback(req: Request, res: Response) {
+        try {
+            passport.authenticate('google', {session: false}, (err: Error, user: IUser, info: IVerifyOptions) => {
+                if (err) return res.status(400).send({message: GENERIC_ERROR, error: err.message});
 
                 if (!user) return res.status(404).send({message: FAILED_AUTH});
 
