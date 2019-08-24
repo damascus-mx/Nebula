@@ -53,7 +53,6 @@ export class Token extends Model implements IToken {
             fk_user: {
                 type: DataTypes.BIGINT,
                 allowNull: false,
-                unique: true,
                 references: {
                     model: User,
                     key: 'fk_user'
@@ -71,7 +70,6 @@ export class Token extends Model implements IToken {
             }
         }, {
             schema: 'client',
-            indexes: [],
             tableName: 'token',
             timestamps: false,
             sequelize: PoolInstance.getInstance()
