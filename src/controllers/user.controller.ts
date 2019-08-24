@@ -92,7 +92,7 @@ export class UserController implements IUserController {
         try {
             if ( isNaN(Number(req.params.id)) ) return res.status(404).send({message: INVALID_ID});
             const response: any = await UserController._userRepository.Delete(req.params.id);
-            console.log(response);
+
             response > 0 ? res.status(200).send({message: `User ${DELETED_FIELD}`}) : res.status(400).send({message: `User ${NOT_FOUND}`});
         } catch (error) {
             res.status(500).send({message: GENERIC_ERROR, error: error.message});
