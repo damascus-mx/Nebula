@@ -13,7 +13,7 @@ export interface IRepository<T> {
     Update(Id: any, payload: any): Promise<void>;
     Delete(Id: any): Promise<void>;
     GetById(Id: any): Promise<T>;
-    GetAll(): Promise<T[]>;
+    GetAll(limit: number, page: number): Promise<{rows: T[], count: number}>;
     FindOne(args?: any): Promise<T>;
-    FindMany(args?:any): Promise<T[]>;
+    FindMany(limit: number, page: number, args?:any): Promise<T[]>;
 }

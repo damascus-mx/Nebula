@@ -11,7 +11,7 @@
 // Required libs
 import { GENERIC_ERROR, MISSING_FIELDS, NOT_FOUND, DELETED_FIELD, UPDATED_FIELD, FAILED_AUTH, INVALID_ID } from "../common/config/app.config";
 import { Request, Response } from "express";
-import { check, sanitize, validationResult } from "express-validator";
+import { check, sanitize, validationResult, query } from "express-validator";
 
 // Interfaces
 import IUserController from "../core/controllers/user.controller";
@@ -101,8 +101,11 @@ export class UserController implements IUserController {
 
     async GetAll(req: Request, res: Response) {
         try {
-            const users = await UserController._userRepository.GetAll();
-            users && users.length > 0 ? res.status(200).send({users: users}) : res.status(404).send({message: `Users ${NOT_FOUND}`});
+            const page = req.query.page && req.query.page > 0 ? req.query.page - 1 : 0;
+            const maxItems = req.query.max && req.query.max > 0 ? req.query.max : 20;
+            
+            const users = await UserController._userRepository.GetAll(maxItems, page);
+            users && users.rows.length > 0 ? res.status(200).send({users: users}) : res.status(404).send({message: `Users ${NOT_FOUND}`});
         } catch (error) {
             res.status(400).send({message: GENERIC_ERROR, error: error.message});
         }

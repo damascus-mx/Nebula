@@ -39,9 +39,10 @@ import { Token, IToken } from "../../domain/models/token.model";
         .then(token => token).catch(e => e);
     }
 
-    GetAll(): Promise<IToken[]> {
+    GetAll(limit: number, page: number): Promise<{rows: IToken[], count: number}> {
         Token.startModel();
-        return Token.findAll({raw: true})
+        const offsetSQL: number = Number(page) * Number(limit);
+        return Token.findAndCountAll({raw: true , limit: limit, offset: offsetSQL })
         .then(tokens => tokens).catch(e => e);
     }
 
@@ -51,9 +52,11 @@ import { Token, IToken } from "../../domain/models/token.model";
         .then(token => token).catch(e => e);
     }
 
-    FindMany(args?: any): Promise<IToken[]> {
+    FindMany(limit: number, page: number, args?: any): Promise<IToken[]> {
         Token.startModel();
-        return Token.findAll({ raw: true, where: args })
+        const offsetSQL: number = Number(page) * Number(limit);
+
+        return Token.findAll({ raw: true, where: args, limit: limit, offset: offsetSQL })
         .then(tokens => tokens).catch(e => e);
     }
  }

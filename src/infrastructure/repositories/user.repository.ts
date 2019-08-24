@@ -54,7 +54,7 @@ export class UserRepository implements IUserRepository {
      * @description Get a user by it's ID
      * @param Id User-to-find's ID
      */
-    GetById(Id: number): Promise<User> {
+    GetById(Id: number): Promise<IUser> {
         User.startModel();
         return User.findByPk(Id, {raw: true})
         .then(user => user)
@@ -63,10 +63,14 @@ export class UserRepository implements IUserRepository {
     
     /**
      * @description Get all users
+     * @param limit Max items
+     * @param offset Page
      */
-    GetAll(): Promise<User[]> {
+    GetAll(limit: number, page: number): Promise<{rows: IUser[], count: number}> {
         User.startModel();
-        return User.findAll({raw: true})
+        const offsetSQL: number = Number(page) * Number(limit);
+
+        return User.findAndCountAll({raw: true, limit: limit, offset: offsetSQL})
         .then(users => users)
         .catch(e => e);
     }
@@ -86,9 +90,11 @@ export class UserRepository implements IUserRepository {
      * @description Find users with custom queries
      * @param args Query object
      */
-    FindMany(args?: any): Promise<User[]> {
+    FindMany(limit: number, page: number, args?: any): Promise<User[]> {
         User.startModel();
-        return User.findAll({raw: true, where: args })
+        const offsetSQL: number = Number(page) * Number(limit);
+
+        return User.findAll({raw: true, where: args, limit: limit, offset: offsetSQL })
         .then(user => user)
         .catch(e => e);
     }
