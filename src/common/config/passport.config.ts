@@ -16,10 +16,8 @@ import { UserRepository } from '../../infrastructure/repositories/user.repositor
 import { AuthService } from "../../services/auth.service";
 import IUserRepository from "../../core/repositories/user.repository";
 import { Sequelize } from "sequelize";
-import { IUser } from "../../domain/models/user.model";
-import { SHA256 } from 'crypto-js';
-import bcrypt from 'bcryptjs';
 import { Request } from "express";
+import { ProviderEnum } from "../enums/provider.enum";
 
 const LocalStrategy = passportLocal.Strategy;
 const FacebookStrategy = passportFacebook.Strategy;
@@ -57,72 +55,14 @@ export default () => {
         callbackURL: '/api/v1/connect/facebook/callback',
         profileFields: ["name", "email", "picture", "link", "displayName", "location", "friends"],
         passReqToCallback: true
-    }, async (req: Request, accessToken: string, refreshToken: string, profile: any, done) => {
-        try {
-            const user = await _userRepository.FindOne({oauth_id: profile.id});
-
-            // Logged
-            if (req.user) {
-
-            } else {
-                
-                if (user) return done(null, user);
-                else {
-                    const newUser: IUser = {
-                        username: SHA256(profile.id).toString().substring(0, 25),
-                        password: await bcrypt.hash(SHA256(profile.id).toString().substring(0, 20), 10),
-                        email: profile.emails[0].value,
-                        name: profile.name.givenName,
-                        surname: profile.name.familyName,
-                        image: `https://graph.facebook.com/${profile.id}/picture?type=large`,
-                        country: 'us',
-                        domain: 'facebook',
-                        oauth_id: profile.id
-                    }
-
-                    try {
-                        const response: any = await _userRepository.Create(newUser);
-
-                        !response.errors ? done(null, response) : done(response.errors[0], null);
-                    } catch (error) {
-                        done(error, null)
-                    }
-                }
-            }
-            
-        } catch (error) {
-            return done(error);
-        }
-    }));
+    }, (req: Request, accessToken: string, refreshToken: string, profile: any, done) => { AuthService.handleOAuth2(req, accessToken, refreshToken, profile, done, ProviderEnum.FACEBOOK) }
+    ));
 
     passport.use(new GoogleStrategy({
         clientID: process.env.GOOGLE_ID || 'null',
         clientSecret: process.env.GOOGLE_SECRET || 'null',
         callbackURL: '/api/v1/connect/google/callback',
         passReqToCallback: true
-    }, async (req: any, accessToken: any, refreshToken: any, profile: any, done: any ) => {
-        const user = await _userRepository.FindOne({oauth_id: profile.id});
-        if (user) return done(null, user);
-        else {
-            const newUser: IUser = {
-                username: SHA256(profile.id).toString().substring(0, 25),
-                password: await bcrypt.hash(SHA256(profile.id).toString().substring(0, 20), 10),
-                email: profile.emails[0].value,
-                name: profile.name.givenName,
-                surname: profile.name.familyName,
-                image: profile.photos[0].value,
-                country: 'us',
-                domain: 'google',
-                oauth_id: profile.id
-            }
-
-            try {
-                const response: any = await _userRepository.Create(newUser);
-
-                !response.errors ? done(null, response) : done(response.errors[0], null);
-            } catch (error) {
-                done(error, null)
-            }
-        }
-    }));
+    }, (req: any, accessToken: any, refreshToken: any, profile: any, done: any ) => { AuthService.handleOAuth2(req, accessToken, refreshToken, profile, done, ProviderEnum.GOOGLE) }
+    ));
 }

@@ -66,7 +66,7 @@ export class User extends Model implements IUser {
 
 
     public static startModel() {
-        User.init({
+        this.init({
             id: {
                 type: DataTypes.BIGINT,
                 autoIncrement: true,
