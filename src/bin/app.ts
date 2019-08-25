@@ -9,7 +9,7 @@
  */
 
 // Required libs
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import compression  from 'compression';
 import * as bodyParser from 'body-parser';
 import morgan from 'morgan';
@@ -24,10 +24,9 @@ import * as passportConfig from '../common/config/passport.config';
 
 // Const
 const app = express();
-const API_ROUTE = '/api/v1';
 
 // Routes import
-import { UserRoutes } from '../routes/user.routes';
+import Routes from '../routes';
 
 // Gzip compression
 app.use(compression());
@@ -67,6 +66,6 @@ app.use((req, res, next) => {
 });
 
 // Routes
-app.use(API_ROUTE, UserRoutes);
+app.use(Routes);
 
 export default app;

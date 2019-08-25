@@ -23,6 +23,7 @@ import { IUser } from "../domain/models/user.model";
 // - OAuth2
 import passport = require("passport");
 import { IVerifyOptions } from "passport-local";
+import { AuthService } from "../services/auth.service";
 
 export class UserController implements IUserController {
     private static _userService: IUserService;
@@ -106,13 +107,28 @@ export class UserController implements IUserController {
             const payload = req.body;
             if ( !payload.username || !payload.password ) return res.status(404).send({message: MISSING_FIELDS});
 
-            passport.authenticate("local", {session: false}, (err: Error, user: IUser, info: IVerifyOptions) => {
+            passport.authenticate('local', {session: false}, (err: Error, user: IUser, info: IVerifyOptions) => {
                 if (err) res.status(400).send({message: GENERIC_ERROR, error: err.message});
 
                 if (!user) return res.status(404).send({message: FAILED_AUTH});
 
-                return res.status(200).send({user: user});
+                const jwtUser = AuthService.generateJWTToken(user);
+
+                return res.status(200).send({jwt: jwtUser});
             })(req, res);
+
+        } catch (error) {
+            res.status(400).send({message: GENERIC_ERROR, error: error.message});
+        }
+    }
+
+    async ForceSignIn(req: Request, res: Response) {
+        try {
+            const payload = req.body;
+            if ( !payload.username ) return res.status(404).send({message: MISSING_FIELDS});
+
+            const jwtUser = await UserController._userService.forceSignIn(payload.user);
+            jwtUser ? res.status(200).send({jwt: jwtUser}) : res.status(404).send({message: FAILED_AUTH});
 
         } catch (error) {
             res.status(400).send({message: GENERIC_ERROR, error: error.message});

@@ -17,8 +17,9 @@ import { TokenRepository } from '../infrastructure/repositories/token.repository
 import { IToken } from '../domain/models/token.model';
 import { IUser } from '../domain/models/user.model';
 import { SHA256 } from 'crypto-js';
+import jwt from 'jsonwebtoken';
 import EmailHelper from '../common/helpers/mail.helper';
-import { APP_NAME, FAILED_CREATE } from '../common/config/app.config';
+import { APP_NAME, FAILED_CREATE, JWT_SECRET, JWT_EXPIRATION, DOMAIN } from '../common/config/app.config';
 
 export abstract class AuthService {
     private static _userRepository: IUserRepository;
@@ -34,6 +35,14 @@ export abstract class AuthService {
         return bcrypt.compare(password, cipher)
         .then(result => result)
         .catch(e => false);
+    }
+
+    /**
+     * @description Generates JWT Token
+     * @param payload Data to encode
+     */
+    public static generateJWTToken(payload: string | object | Buffer): string {
+        return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRATION, issuer: `https://${DOMAIN}` });
     }
     
     /**

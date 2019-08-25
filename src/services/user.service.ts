@@ -22,10 +22,15 @@ import { UserRepository } from "../infrastructure/repositories/user.repository";
 import bcrypt from 'bcryptjs';
 import { AuthService } from "../services/auth.service";
 import MailHelper from "../common/helpers/mail.helper";
+import { Sequelize } from 'sequelize';
 
 
 export default class UserService implements IUserService {
     private static _userRepository: IUserRepository;
+
+    constructor() {
+        UserService._userRepository = !UserService._userRepository ? new UserRepository() : UserService._userRepository;
+    }
 
     async create(payload: any): Promise<IUser> {
         try {
@@ -40,7 +45,6 @@ export default class UserService implements IUserService {
                 country: payload.country.toLowerCase()
             };
     
-            this.initRepository();
             return UserService._userRepository.Create(user);
         } catch (error) {
             throw error;
@@ -54,7 +58,6 @@ export default class UserService implements IUserService {
             if (payload.username)   payload.username = payload.username.toLowerCase();
             if (payload.email)  payload.email = payload.email.toLowerCase();
 
-            this.initRepository();
             return UserService._userRepository.Update(Id, payload);
         } catch (error) {
             throw error;
@@ -63,7 +66,6 @@ export default class UserService implements IUserService {
 
     async delete(Id: any): Promise<number> {
         try {
-            this.initRepository();
             return UserService._userRepository.Delete(Id);
         } catch (error) {
             throw error;
@@ -76,7 +78,6 @@ export default class UserService implements IUserService {
             const maxItems = limit && limit > 0 ? limit : 20;
             const offset: number = Number(currentPage) * Number(maxItems);
             
-            this.initRepository();
             const users = await UserService._userRepository.GetAll(maxItems, offset);
             return users.rows;
         } catch (error) {
@@ -86,7 +87,6 @@ export default class UserService implements IUserService {
 
     async getById(Id: any): Promise<IUser> {
         try {
-            this.initRepository();
             return UserService._userRepository.GetById(Id);
         } catch (error) {
             throw error;
@@ -97,7 +97,6 @@ export default class UserService implements IUserService {
         try {
             if ( payload.old === payload.new_password ) throw new Error('New password must be different');
 
-            this.initRepository();
             const user = await UserService._userRepository.GetById(Id);
             if (!user) throw new Error(`User ${NOT_FOUND}`);
 
@@ -123,7 +122,6 @@ export default class UserService implements IUserService {
 
     async forceChangePassword(Id: any, password: string): Promise<IUser> {
         try {
-            this.initRepository();
             const user = await UserService._userRepository.GetById(Id);
             if (!user) throw new Error(`User ${NOT_FOUND}`);
 
@@ -144,10 +142,12 @@ export default class UserService implements IUserService {
         }
     }
 
-    /**
-    * Helpers
-    */
-   private initRepository(): void{
-        UserService._userRepository = !UserService._userRepository ? new UserRepository() : UserService._userRepository;
-   }
+    async forceSignIn(user: string): Promise<string> {
+        try {
+            const userToJWT = await UserService._userRepository.FindOne(Sequelize.or({ username: user.toLowerCase() }, { email: user.toLowerCase() }));
+            return AuthService.generateJWTToken(userToJWT);
+        } catch (error) {
+            throw error;
+        }
+    }
 }

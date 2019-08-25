@@ -8,30 +8,35 @@
  * @description Exports user-related endpoints
  */
 
-import express from 'express';
+import { Router } from 'express';
 import IUserController from '../core/controllers/user.controller';
 import { UserController } from '../controllers/user.controller';
-import { isAuthenticated } from '../middlewares/auth.middleware';
+import isAuthenticated from '../middlewares/auth.middleware';
+import isInRole from '../middlewares/role.middleware';
 
-const api = express.Router();
+const api = Router();
 const controller: IUserController = new UserController();
 
-api.post('/user', controller.Create);
-api.put('/user/:id', controller.Update);
-api.delete('/user/:id', controller.Delete);
-api.get('/user', controller.GetAll);
-api.get('/user/:id', controller.GetById);
+api.route('/user').post(controller.Create);
+api.route('/user/:id').put(isAuthenticated, controller.Update);
+api.route('/user/:id').delete(isAuthenticated, isInRole(['ROLE_ADMIN', 'ROLE_SUPPORT']), controller.Delete);
+api.route('/user').get(isAuthenticated, controller.GetAll);
+api.route('/user/:id').get(isAuthenticated, controller.GetById);
 
 // Auth
-api.post('/account/user', controller.LogIn);
-api.put('/account/user/:id', controller.ChangePassword);
-api.put('/account/password/:id', controller.ForceChangePassword);
+api.route('/account/user').post(controller.LogIn);
+api.route('/account/user/:id').put(isAuthenticated, controller.ChangePassword);
+api.route('/account/password/:id').put(controller.ForceChangePassword);
+
+api.route('/support/account/user').post(isAuthenticated, isInRole(['ROLE_ADMIN', 'ROLE_SUPPORT']), controller.ForceSignIn);
 
 // User related
-api.get('/testing/user', isAuthenticated, controller.GetAll);
-api.get('/connect/facebook', controller.Facebook);
-api.get('/connect/facebook/callback', controller.FacebookCallback);
-api.get('/connect/google', controller.Google);
-api.get('/connect/google/callback', controller.GoogleCallback);
+api.route('/testing/user').get(isAuthenticated, isInRole(['ROLE_USER']), controller.GetAll);
 
-export const UserRoutes = api;
+// - OAuth2
+api.route('/connect/facebook').get(controller.Facebook);
+api.route('/connect/facebook/callback').get(controller.FacebookCallback);
+api.route('/connect/google').get(controller.Google);
+api.route('/connect/google/callback').get(controller.GoogleCallback);
+
+export default api;
