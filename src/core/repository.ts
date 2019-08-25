@@ -9,9 +9,9 @@
  */
 
 export interface IRepository<T> {
-    Create(model: T): Promise<void>;
+    Create(model: T): Promise<T>;
     Update(Id: any, payload: any): Promise<void>;
-    Delete(Id: any): Promise<void>;
+    Delete(Id: any): Promise<number>;
     GetById(Id: any): Promise<T>;
     GetAll(limit: number, page: number): Promise<{rows: T[], count: number}>;
     FindOne(args?: any): Promise<T>;

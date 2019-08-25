@@ -16,11 +16,5 @@ export abstract class OAuth2Server {
     /**
      * @description Returns an OAuth2 server instance
      */
-    public static getInstance(): oauth2orize.OAuth2Server {
-        if (!this._server){
-            this._server = oauth2orize.createServer();
-        }
-
-        return this._server;
-    }
+    public static getInstance(): oauth2orize.OAuth2Server { return !this._server ? oauth2orize.createServer() : this._server; }
 }

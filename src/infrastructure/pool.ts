@@ -18,10 +18,5 @@ export abstract class PoolInstance {
     /**
      * @description Returns a database connection / pool instance
      */
-    public static getInstance(): Sequelize {
-        if ( !PoolInstance._Pool ) {
-            PoolInstance._Pool = new Sequelize(process.env.LOCAL_DB || '', { logging: false })
-        }
-        return PoolInstance._Pool;
-    }
+    public static getInstance(): Sequelize { return !this._Pool ? new Sequelize(process.env.LOCAL_DB || '', { logging: false }) : this._Pool; }
 }

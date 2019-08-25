@@ -15,7 +15,7 @@ import { Token, IToken } from "../../domain/models/token.model";
 
     constructor() {}
 
-    Create(model: IToken): Promise<void> {
+    Create(model: IToken): Promise<IToken> {
         Token.startModel();
         return Token.create(model)
         .then(token => token).catch(e => e);
@@ -27,7 +27,7 @@ import { Token, IToken } from "../../domain/models/token.model";
         .then(token => token).catch(e => e);
     }
 
-    Delete(Id: any): Promise<void> {
+    Delete(Id: any): Promise<number> {
         Token.startModel();
         return Token.destroy({where: {id: Id}})
         .then(token => token).catch(e => e);
@@ -41,8 +41,7 @@ import { Token, IToken } from "../../domain/models/token.model";
 
     GetAll(limit: number, page: number): Promise<{rows: IToken[], count: number}> {
         Token.startModel();
-        const offsetSQL: number = Number(page) * Number(limit);
-        return Token.findAndCountAll({raw: true , limit: limit, offset: offsetSQL })
+        return Token.findAndCountAll({raw: true , limit: limit, offset: page })
         .then(tokens => tokens).catch(e => e);
     }
 
@@ -54,9 +53,8 @@ import { Token, IToken } from "../../domain/models/token.model";
 
     FindMany(limit: number, page: number, args?: any): Promise<IToken[]> {
         Token.startModel();
-        const offsetSQL: number = Number(page) * Number(limit);
 
-        return Token.findAll({ raw: true, where: args, limit: limit, offset: offsetSQL })
+        return Token.findAll({ raw: true, where: args, limit: limit, offset: page })
         .then(tokens => tokens).catch(e => e);
     }
  }

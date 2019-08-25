@@ -27,7 +27,7 @@ dotenv.config();
 const sequelize: Sequelize = PoolInstance.getInstance();
 
 // Start OAuth2 server
-const serverOAuth: oauth2orize.OAuth2Server = OAuth2Server.getInstance();
+// const serverOAuth: oauth2orize.OAuth2Server = OAuth2Server.getInstance();
 
 const PORT = process.env.PORT || 5000;
 

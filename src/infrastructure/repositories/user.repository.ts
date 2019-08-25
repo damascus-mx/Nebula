@@ -20,7 +20,7 @@ export class UserRepository implements IUserRepository {
      * @description Create a new user
      * @param model User to create
      */
-    Create(model: IUser): Promise<void> {
+    Create(model: IUser): Promise<IUser> {
         User.startModel();
         return User.create(model)
         .then(user => user)
@@ -43,7 +43,7 @@ export class UserRepository implements IUserRepository {
      * @description Delete a user
      * @param Id User-to-delete's ID
      */
-    Delete(Id: number): Promise<void> {
+    Delete(Id: number): Promise<number> {
         User.startModel();
         return User.destroy({where:{ id: Id }})
         .then(user => user)
@@ -68,9 +68,8 @@ export class UserRepository implements IUserRepository {
      */
     GetAll(limit: number, page: number): Promise<{rows: IUser[], count: number}> {
         User.startModel();
-        const offsetSQL: number = Number(page) * Number(limit);
 
-        return User.findAndCountAll({raw: true, limit: limit, offset: offsetSQL})
+        return User.findAndCountAll({raw: true, limit: limit, offset: page})
         .then(users => users)
         .catch(e => e);
     }
@@ -92,9 +91,8 @@ export class UserRepository implements IUserRepository {
      */
     FindMany(limit: number, page: number, args?: any): Promise<User[]> {
         User.startModel();
-        const offsetSQL: number = Number(page) * Number(limit);
 
-        return User.findAll({raw: true, where: args, limit: limit, offset: offsetSQL })
+        return User.findAll({raw: true, where: args, limit: limit, offset: page })
         .then(user => user)
         .catch(e => e);
     }

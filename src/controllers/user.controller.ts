@@ -9,9 +9,9 @@
  */
 
 // Required libs
-import { GENERIC_ERROR, MISSING_FIELDS, NOT_FOUND, DELETED_FIELD, UPDATED_FIELD, FAILED_AUTH, INVALID_ID } from "../common/config/app.config";
+import { GENERIC_ERROR, MISSING_FIELDS, NOT_FOUND, DELETED_FIELD, UPDATED_FIELD, FAILED_AUTH, INVALID_ID, FAILED_CREATE } from "../common/config/app.config";
 import { Request, Response } from "express";
-import { check, sanitize, validationResult, query } from "express-validator";
+import { check, sanitize, validationResult } from "express-validator";
 
 // Interfaces
 import IUserController from "../core/controllers/user.controller";
@@ -26,12 +26,13 @@ import bcrypt from 'bcryptjs';
 import { AuthService } from "../services/auth.service";
 import passport = require("passport");
 import { IVerifyOptions } from "passport-local";
+import UserService from "../services/user.service";
 
 export class UserController implements IUserController {
-    private static _userRepository: IUserRepository;
+    private static _userService: UserService;
 
     constructor() {
-        UserController._userRepository = new UserRepository();
+        UserController._userService = new UserService();
     }
 
     async Create(req: Request, res: Response) {
@@ -50,19 +51,9 @@ export class UserController implements IUserController {
 
             if(!errors.isEmpty()) return res.status(400).send({errors: errors.array()});
 
-            const cipherText = await bcrypt.hash(payload.password, 10);
+            const user = await UserController._userService.create(payload);
+            user ? res.status(200).send({user: user}) : res.status(400).send({message: `User ${FAILED_CREATE}`});
 
-            const user: IUser = {
-                username: payload.username.toLowerCase(),
-                password: cipherText,
-                email: payload.email.toLowerCase(),
-                name: payload.name,
-                surname: payload.surname,
-                country: payload.country.toLowerCase()
-            };
-
-            const response: any = await UserController._userRepository.Create(user);
-            !response.errors ? res.status(200).send({user: response}) : res.status(400).send({message: response.errors[0].message});
         } catch (error) {
             res.status(500).send({message: GENERIC_ERROR, error: error.message});
         }
@@ -77,12 +68,7 @@ export class UserController implements IUserController {
 
             sanitize("email").normalizeEmail({ gmail_remove_dots: false });
 
-            payload.updated_at = new Date();
-
-            if (payload.username)   payload.username = payload.username.toLowerCase();
-            if (payload.email)  payload.email = payload.email.toLowerCase();
-
-            const response: any = await UserController._userRepository.Update(req.params.id, payload);
+            const response: any = await UserController._userService.update(req.params.id, payload);
 
             !response.errors ? res.status(200).send({message: `User ${UPDATED_FIELD}`}) : res.status(400).send({message: response.errors[0].message});
         } catch (error) {
@@ -93,7 +79,7 @@ export class UserController implements IUserController {
     async Delete(req: Request, res: Response) {
         try {
             if ( isNaN(Number(req.params.id)) ) return res.status(404).send({message: INVALID_ID});
-            const response: any = await UserController._userRepository.Delete(req.params.id);
+            const response = await UserController._userService.delete(req.params.id);
 
             response > 0 ? res.status(200).send({message: `User ${DELETED_FIELD}`}) : res.status(400).send({message: `User ${NOT_FOUND}`});
         } catch (error) {
@@ -103,11 +89,8 @@ export class UserController implements IUserController {
 
     async GetAll(req: Request, res: Response) {
         try {
-            const page = req.query.page && req.query.page > 0 ? req.query.page - 1 : 0;
-            const maxItems = req.query.max && req.query.max > 0 ? req.query.max : 20;
-            
-            const users = await UserController._userRepository.GetAll(maxItems, page);
-            users && users.rows.length > 0 ? res.status(200).send({users: users}) : res.status(404).send({message: `Users ${NOT_FOUND}`});
+            const users = await UserController._userService.getAll(req.query.limit, req.query.page);
+            users.length > 0 ? res.status(200).send({users: users}) : res.status(404).send({message: `Users ${NOT_FOUND}`});
         } catch (error) {
             res.status(400).send({message: GENERIC_ERROR, error: error.message});
         }
@@ -115,7 +98,7 @@ export class UserController implements IUserController {
 
     async GetById(req: Request, res: Response) {
         try {
-            const users = await UserController._userRepository.GetById(req.params.id);
+            const users = await UserController._userService.getById(req.params.id);
             users ? res.status(200).send({users: users}) : res.status(404).send({message: `User ${NOT_FOUND}`});
         } catch (error) {
             res.status(400).send({message: GENERIC_ERROR, error: error.message});
@@ -146,17 +129,9 @@ export class UserController implements IUserController {
             if ( !req.params.id || isNaN(Number(req.params.id)) ) return res.status(404).send({message: INVALID_ID});
             if ( !payload.old_password || !payload.new_password ) return res.status(404).send({message: MISSING_FIELDS});
 
-            const user = await UserController._userRepository.GetById(req.params.id);
-            if (!user) return res.status(404).send({message: `User ${NOT_FOUND}`});
-            if ( payload.old === payload.new_password ) return res.status(400).send({message: 'New password must be different'});
+            const user = await UserController._userService.changePassword(req.params.id, payload);
 
-            if ( await AuthService.verifyPassword(payload.old_password, user.password) ) {
-                const cipherText = await bcrypt.hash(payload.new_password, 10);
-                UserController._userRepository.Update(user.id, {password: cipherText});
-                return res.status(200).send({message: user});
-            }
-
-            return res.status(400).send({message: FAILED_AUTH});
+            user ? res.status(200).send({user: user}) : res.status(400).send({message: FAILED_AUTH});
 
         } catch (error) {
             res.status(400).send({message: GENERIC_ERROR, error: error.message});
