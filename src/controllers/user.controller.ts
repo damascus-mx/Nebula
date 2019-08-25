@@ -77,6 +77,8 @@ export class UserController implements IUserController {
 
             sanitize("email").normalizeEmail({ gmail_remove_dots: false });
 
+            payload.updated_at = new Date();
+
             if (payload.username)   payload.username = payload.username.toLowerCase();
             if (payload.email)  payload.email = payload.email.toLowerCase();
 

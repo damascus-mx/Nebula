@@ -61,7 +61,8 @@ export abstract class AuthService {
                             const token: IToken = {
                                 kind: provider,
                                 access_token: accessToken,
-                                fk_user: user.id || 0
+                                fk_user: user.id || 0,
+                                updated_at: new Date()
                             }
         
                             return lastToken ?  this._tokenRepository.Update(lastToken.id, token).then(token => done(null, user)).catch(e => done(e, null)) : 
@@ -83,7 +84,8 @@ export abstract class AuthService {
                         surname: profile.name.familyName,
                         image: custom_image || profile.photos[0].value,
                         domain: provider,
-                        oauth_id: profile.id
+                        oauth_id: profile.id,
+                        updated_at: new Date()
                     }
     
                     try {
@@ -112,7 +114,8 @@ export abstract class AuthService {
                         const token: IToken = {
                             kind: provider,
                             access_token: accessToken,
-                            fk_user: user.id || 0
+                            fk_user: user.id || 0,
+                            updated_at: new Date()
                         }
     
                         return lastToken ?  this._tokenRepository.Update(lastToken.id, token).then(token => done(null, user)).catch(e => done(e, null)) : 

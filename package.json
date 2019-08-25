@@ -62,6 +62,7 @@
     "@types/mocha": "^5.2.7",
     "@types/morgan": "^1.7.36",
     "@types/node": "^12.7.2",
+    "@types/oauth2orize": "^1.8.7",
     "@types/passport": "^1.0.0",
     "@types/passport-facebook": "^2.1.9",
     "@types/passport-google-oauth": "^1.0.41",

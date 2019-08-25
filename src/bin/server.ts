@@ -17,12 +17,17 @@ import dotenv from 'dotenv';
 import app from './app';
 import { PoolInstance } from '../infrastructure/pool';
 import { Sequelize } from 'sequelize';
+import oauth2orize from 'oauth2orize';
+import { OAuth2Server } from "../infrastructure/oauth.server";
 
 // Start dotenv
 dotenv.config();
 
 // Start pool
 const sequelize: Sequelize = PoolInstance.getInstance();
+
+// Start OAuth2 server
+const serverOAuth: oauth2orize.OAuth2Server = OAuth2Server.getInstance();
 
 const PORT = process.env.PORT || 5000;
 
