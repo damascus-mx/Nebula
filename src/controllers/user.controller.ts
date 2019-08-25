@@ -13,23 +13,19 @@ import { GENERIC_ERROR, MISSING_FIELDS, NOT_FOUND, DELETED_FIELD, UPDATED_FIELD,
 import { Request, Response } from "express";
 import { check, sanitize, validationResult } from "express-validator";
 
-// Interfaces
+// Interfaces - Implementations
 import IUserController from "../core/controllers/user.controller";
+import IUserService from "../core/services/user.interface";
+import UserService from "../services/user.service";
 import { IUser } from "../domain/models/user.model";
-// Repository
-import { UserRepository } from "../infrastructure/repositories/user.repository";
-import IUserRepository from "../core/repositories/user.repository";
 
 // Auth
-// - Cryptographic
-import bcrypt from 'bcryptjs';
-import { AuthService } from "../services/auth.service";
+// - OAuth2
 import passport = require("passport");
 import { IVerifyOptions } from "passport-local";
-import UserService from "../services/user.service";
 
 export class UserController implements IUserController {
-    private static _userService: UserService;
+    private static _userService: IUserService;
 
     constructor() {
         UserController._userService = new UserService();

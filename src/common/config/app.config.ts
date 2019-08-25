@@ -18,3 +18,4 @@ export const UPDATED_FIELD = 'succesfuly updated';
 export const DELETED_FIELD = 'succesfuly deleted';
 export const FAILED_AUTH = 'Authentication failed';
 export const INVALID_ID = 'Invalid ID';
+export const DOMAIN ='damascus-engineering.com';

@@ -1,3 +1,13 @@
+/**
+ * @name Nebula
+ * @version 0.0.1a
+ * @copyright Damascus Engineering. 2019 All rights reserved.
+ * @license Confidential This file belongs to Damascus Engineering intellectual property,
+ * any unauthorized distribution of this file will be punished by law.
+ * @author Alonso Ruiz
+ * @description Handles all user operations
+ */
+
 import { NOT_FOUND } from "../common/config/app.config";
 
 // Interfaces
@@ -11,10 +21,12 @@ import { UserRepository } from "../infrastructure/repositories/user.repository";
 // - Cryptographic
 import bcrypt from 'bcryptjs';
 import { AuthService } from "../services/auth.service";
+import MailHelper from "../common/helpers/mail.helper";
 
 
 export default class UserService implements IUserService {
     private static _userRepository: IUserRepository;
+    private static _mailHelper: MailHelper;
 
     async create(payload: any): Promise<IUser> {
         try {
@@ -76,6 +88,11 @@ export default class UserService implements IUserService {
     async getById(Id: any): Promise<IUser> {
         try {
             this.initRepository();
+            UserService._mailHelper = new MailHelper();
+            UserService._mailHelper.sendMail('luis.alonso.16@hotmail.com', 'support', 'Testing 2 boi', `Just testing the app kid, dont worry.\nRegards,\nDamascus Engineering.`
+            , 'Damascus Support')
+            .then(success => console.log('Send email.'))
+            .catch(error => console.log(error));
             return UserService._userRepository.GetById(Id);
         } catch (error) {
             throw error;
