@@ -88,11 +88,6 @@ export default class UserService implements IUserService {
     async getById(Id: any): Promise<IUser> {
         try {
             this.initRepository();
-            UserService._mailHelper = new MailHelper();
-            UserService._mailHelper.sendMail('luis.alonso.16@hotmail.com', 'support', 'Testing 2 boi', `Just testing the app kid, dont worry.\nRegards,\nDamascus Engineering.`
-            , 'Damascus Support')
-            .then(success => console.log('Send email.'))
-            .catch(error => console.log(error));
             return UserService._userRepository.GetById(Id);
         } catch (error) {
             throw error;
@@ -101,18 +96,50 @@ export default class UserService implements IUserService {
 
     async changePassword(Id: any, payload: any): Promise<IUser> {
         try {
+            if ( payload.old === payload.new_password ) throw new Error('New password must be different');
+
             this.initRepository();
             const user = await UserService._userRepository.GetById(Id);
             if (!user) throw new Error(`User ${NOT_FOUND}`);
-            if ( payload.old === payload.new_password ) throw new Error('New password must be different');
 
             if ( await AuthService.verifyPassword(payload.old_password, user.password) ) {
                 const cipherText = await bcrypt.hash(payload.new_password, 10);
-                UserService._userRepository.Update(user.id, {password: cipherText});
+                UserService._userRepository.Update(user.id, {password: cipherText, updated_at: new Date()});
+
+                UserService._mailHelper = new MailHelper();
+                const message = `Hey, ${user.name}.\n\nYour password just changed at ${new Date().toString()}.\nPlease, feel free to contact us if it wasn't you.\n\n
+                                Greetings,\nNightLifeX Team`;
+                UserService._mailHelper.sendMail([user.email], 'nightlifex.support', 'Your password has changed', message, 'NightLifeX')
+                .then(success => success)
+                .catch(error => console.log(`Error sending email to ${user.email}`));
+
                 return user;
             }
 
             return user;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async forceChangePassword(Id: any, password: string): Promise<IUser> {
+        try {
+            this.initRepository();
+            const user = await UserService._userRepository.GetById(Id);
+            if (!user) throw new Error(`User ${NOT_FOUND}`);
+
+            const cipherText = await bcrypt.hash(password, 10);
+            UserService._userRepository.Update(Id, { password: cipherText, updated_at: new Date() });
+
+            UserService._mailHelper = new MailHelper();
+            const message = `Hey, ${user.name}.\n\nYour password just changed at ${new Date().toString()}.\nPlease, feel free to contact us if it wasn't you.\n\n
+                            Greetings,\nNightLifeX Team`;
+            UserService._mailHelper.sendMail([user.email], 'nightlifex.support', 'Your password has changed', message, 'NightLifeX')
+            .then(success => success)
+            .catch(error => console.log(`Error sending email to ${user.email}`));
+
+            return user;
+
         } catch (error) {
             throw error;
         }

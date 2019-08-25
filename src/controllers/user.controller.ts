@@ -134,6 +134,20 @@ export class UserController implements IUserController {
         }
     }
 
+    async ForceChangePassword(req: Request, res: Response) {
+        try {
+            const payload = req.body;
+            if ( !payload.password || !req.params.id || isNaN(Number(req.params.id)) ) return res.status(404).send({message: MISSING_FIELDS}); 
+
+            const user = await UserController._userService.forceChangePassword(req.params.id, payload.password);
+
+            user ? res.status(200).send({user: user}) : res.status(400).send({message: FAILED_AUTH});
+
+        } catch (error) {
+            res.status(400).send({message: GENERIC_ERROR, error: error.message});
+        }
+    }
+
     /**
      * OAuth2 Helpers / Callbacks
      */

@@ -25,6 +25,7 @@ api.get('/user/:id', controller.GetById);
 // Auth
 api.post('/account/user', controller.LogIn);
 api.put('/account/user/:id', controller.ChangePassword);
+api.put('/account/password/:id', controller.ForceChangePassword);
 
 // User related
 api.get('/testing/user', isAuthenticated, controller.GetAll);

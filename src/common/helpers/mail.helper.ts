@@ -27,14 +27,8 @@ export default class MailHelper {
         }) : MailHelper._transporter; 
     }
 
-    public sendMail(receiver: string, sender: string, subject: string, message: string, senderName?: string): Promise<any> {
+    public sendMail(recipients: string[], sender: string, subject: string, message: string, senderName?: string): Promise<any> {
         try {
-            MailHelper._transporter.verify()
-            .then(success => {
-                console.log('SMTP Server configured correctly');
-            })
-            .catch(e => e);
-
             /**
              * Mail_Domain = const domain name in app config
              * ex. @example.com
@@ -43,7 +37,7 @@ export default class MailHelper {
             const senderFormated = senderName ? `${senderName} <${sender}@${DOMAIN}>` : `${sender}@${DOMAIN}`
 
             const mailOptions: Mail.Options = {
-                to: receiver,
+                to: recipients,
                 from: senderFormated,
                 subject: subject,
                 text: message
@@ -54,4 +48,27 @@ export default class MailHelper {
             throw error;
         }
     }
+
+    public sendMailHTML(recipients: string[], sender: string, subject: string, htmlTemplate: any, senderName?: string): Promise<any> {
+        try {
+            /**
+             * Mail_Domain = const domain name in app config
+             * ex. @example.com
+             */
+
+            const senderFormated = senderName ? `${senderName} <${sender}@${DOMAIN}>` : `${sender}@${DOMAIN}`
+
+            const mailOptions: Mail.Options = {
+                to: recipients,
+                from: senderFormated,
+                subject: subject,
+                html: htmlTemplate
+            };
+    
+            return MailHelper._transporter.sendMail(mailOptions);
+        } catch (error) {
+            throw error;
+        }
+    }
+
 }

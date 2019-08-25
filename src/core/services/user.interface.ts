@@ -13,4 +13,5 @@ import IService from "../service";
 
 export default interface IUserService extends IService<IUser> {
     changePassword(Id: any, payload: any): Promise<IUser>;
+    forceChangePassword(Id: any, password: string): Promise<IUser>;
 }
