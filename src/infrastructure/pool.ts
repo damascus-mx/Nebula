@@ -13,7 +13,7 @@ import { Sequelize } from 'sequelize';
 export abstract class PoolInstance {
     private static _Pool: Sequelize;
 
-    constructor(){}
+    private constructor(){}
 
     /**
      * @description Returns a database connection / pool instance

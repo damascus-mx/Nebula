@@ -10,7 +10,6 @@
 
 import { Model, DataTypes } from 'sequelize';
 import { PoolInstance } from '../../infrastructure/pool';
-import { Token } from './token.model';
 
 export interface IUser {
     id?: number,

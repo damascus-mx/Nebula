@@ -8,7 +8,7 @@
  * @description Handles all user operations
  */
 
-import { NOT_FOUND } from "../common/config/app.config";
+import { NOT_FOUND, APP_NAME, EMAIL_SUPPORT } from "../common/config/app.config";
 
 // Interfaces
 import IUserRepository from "../core/repositories/user.repository";
@@ -26,7 +26,6 @@ import MailHelper from "../common/helpers/mail.helper";
 
 export default class UserService implements IUserService {
     private static _userRepository: IUserRepository;
-    private static _mailHelper: MailHelper;
 
     async create(payload: any): Promise<IUser> {
         try {
@@ -106,10 +105,10 @@ export default class UserService implements IUserService {
                 const cipherText = await bcrypt.hash(payload.new_password, 10);
                 UserService._userRepository.Update(user.id, {password: cipherText, updated_at: new Date()});
 
-                UserService._mailHelper = new MailHelper();
-                const message = `Hey, ${user.name}.\n\nYour password just changed at ${new Date().toString()}.\nPlease, feel free to contact us if it wasn't you.\n\n
-                                Greetings,\nNightLifeX Team`;
-                UserService._mailHelper.sendMail([user.email], 'nightlifex.support', 'Your password has changed', message, 'NightLifeX')
+                const mailHelper = MailHelper.getInstance();
+                const message = `Hey, ${user.name}.\n\nYour password just changed at ${new Date().toString()}.\nPlease, feel free to contact us if it wasn't you.\n\n`+
+                                `Greetings,\n${APP_NAME}'s Team`;
+                mailHelper.sendMail([user.email], EMAIL_SUPPORT, 'Your password has changed', message, APP_NAME)
                 .then(success => success)
                 .catch(error => console.log(`Error sending email to ${user.email}`));
 
@@ -131,10 +130,10 @@ export default class UserService implements IUserService {
             const cipherText = await bcrypt.hash(password, 10);
             UserService._userRepository.Update(Id, { password: cipherText, updated_at: new Date() });
 
-            UserService._mailHelper = new MailHelper();
-            const message = `Hey, ${user.name}.\n\nYour password just changed at ${new Date().toString()}.\nPlease, feel free to contact us if it wasn't you.\n\n
-                            Greetings,\nNightLifeX Team`;
-            UserService._mailHelper.sendMail([user.email], 'nightlifex.support', 'Your password has changed', message, 'NightLifeX')
+            const mailHelper = MailHelper.getInstance();
+            const message = `Hey, ${user.name}.\n\nYour password just changed at ${new Date().toString()}.\nPlease, feel free to contact us if it wasn't you.\n\n`+
+                            `Greetings,\n${APP_NAME}'s Team`;
+            mailHelper.sendMail([user.email], EMAIL_SUPPORT, 'Your password has changed', message, APP_NAME)
             .then(success => success)
             .catch(error => console.log(`Error sending email to ${user.email}`));
 

@@ -15,8 +15,9 @@ import { DOMAIN } from '../config/app.config';
 
 export default class MailHelper {
     private static _transporter: Mail;
+    private static instance: MailHelper;
 
-    constructor() {
+    private constructor() {
         AWS.config.accessKeyId = process.env.SMTP_USER;
         AWS.config.secretAccessKey = process.env.SMTP_PASSWORD;
         AWS.config.region = process.env.AWS_SMTP_REGION;
@@ -70,5 +71,7 @@ export default class MailHelper {
             throw error;
         }
     }
+
+    static getInstance(): MailHelper { return !this.instance ? new MailHelper() : this.instance; }
 
 }

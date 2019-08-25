@@ -64,12 +64,11 @@ export class UserRepository implements IUserRepository {
     /**
      * @description Get all users
      * @param limit Max items
-     * @param offset Page
+     * @param page Page number
      */
     GetAll(limit: number, page: number): Promise<{rows: IUser[], count: number}> {
         User.startModel();
-
-        return User.findAndCountAll({raw: true, limit: limit, offset: page})
+        return User.findAndCountAll({raw: true, limit: limit, offset: page, order: [ ['id', 'ASC'] ]})
         .then(users => users)
         .catch(e => e);
     }
@@ -87,12 +86,13 @@ export class UserRepository implements IUserRepository {
 
     /**
      * @description Find users with custom queries
+     * @param limit Max items
+     * @param page Page number
      * @param args Query object
      */
     FindMany(limit: number, page: number, args?: any): Promise<User[]> {
         User.startModel();
-
-        return User.findAll({raw: true, where: args, limit: limit, offset: page })
+        return User.findAll({raw: true, where: args, limit: limit, offset: page, order: [ ['id', 'ASC'] ] })
         .then(user => user)
         .catch(e => e);
     }

@@ -13,6 +13,8 @@ import oauth2orize from 'oauth2orize'
 export abstract class OAuth2Server {
     private static _server: oauth2orize.OAuth2Server;
 
+    private constructor() {}
+
     /**
      * @description Returns an OAuth2 server instance
      */
