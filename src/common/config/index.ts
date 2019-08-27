@@ -7,6 +7,8 @@
  * @author Alonso Ruiz
  * @description Stores all enviroment const
  */
+import dotenv from 'dotenv';
+dotenv.config();
 
 export default {
     ENVIROMENT: process.env.NODE_ENV || 'production',

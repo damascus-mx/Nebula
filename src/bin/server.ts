@@ -11,16 +11,12 @@
 // Modules
 import "reflect-metadata";
 import cluster  from 'cluster';
-import dotenv from 'dotenv';
 
 // Custom Modules
 import app from './app';
 import { PoolInstance } from '../infrastructure/pool';
 import { Sequelize } from 'sequelize';
 import Config from '../common/config';
-
-// Start dotenv
-dotenv.config();
 
 // Start pool
 const sequelize: Sequelize = PoolInstance.getInstance();
