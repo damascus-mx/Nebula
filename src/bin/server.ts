@@ -17,6 +17,7 @@ import dotenv from 'dotenv';
 import app from './app';
 import { PoolInstance } from '../infrastructure/pool';
 import { Sequelize } from 'sequelize';
+import Config from '../common/config';
 
 // Start dotenv
 dotenv.config();
@@ -24,7 +25,7 @@ dotenv.config();
 // Start pool
 const sequelize: Sequelize = PoolInstance.getInstance();
 
-const PORT = process.env.PORT || 5000;
+const PORT = Config.EXPRESS_PORT;
 
 // Start API cluster
 if ( cluster.isMaster ) {

@@ -16,6 +16,7 @@ import { UserRepository } from '../../infrastructure/repositories/user.repositor
 import { AuthService } from "../../services/auth.service";
 import IUserRepository from "../../core/repositories/user.repository";
 import { Sequelize } from "sequelize";
+import Config from './';
 import { Request } from "express";
 import { ProviderEnum } from "../enums/provider.enum";
 
@@ -50,8 +51,8 @@ export default () => {
     *   -   Logged user facebook integration
     */
     passport.use(new FacebookStrategy({
-        clientID: process.env.FACEBOOK_ID || 'null',
-        clientSecret: process.env.FACEBOOK_SECRET || 'null',
+        clientID: Config.facebook.APP_ID,
+        clientSecret: Config.facebook.APP_SECRET,
         callbackURL: '/api/v1/connect/facebook/callback',
         profileFields: ["name", "email", "picture", "link", "displayName", "location", "friends"],
         passReqToCallback: true
@@ -59,8 +60,8 @@ export default () => {
     ));
 
     passport.use(new GoogleStrategy({
-        clientID: process.env.GOOGLE_ID || 'null',
-        clientSecret: process.env.GOOGLE_SECRET || 'null',
+        clientID: Config.google.APP_ID || 'null',
+        clientSecret: Config.google.APP_SECRET || 'null',
         callbackURL: '/api/v1/connect/google/callback',
         passReqToCallback: true
     }, (req: any, accessToken: any, refreshToken: any, profile: any, done: any ) => { AuthService.handleOAuth2(req, accessToken, refreshToken, profile, done, ProviderEnum.GOOGLE) }

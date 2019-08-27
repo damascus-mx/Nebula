@@ -19,7 +19,8 @@ import { IUser } from '../domain/models/user.model';
 import { SHA256 } from 'crypto-js';
 import jwt from 'jsonwebtoken';
 import EmailHelper from '../common/helpers/mail.helper';
-import { APP_NAME, FAILED_CREATE, JWT_SECRET, JWT_EXPIRATION, DOMAIN } from '../common/config/app.config';
+import Config from '../common/config';
+import { APP_NAME, FAILED_CREATE, JWT_EXPIRATION, DOMAIN } from '../common/config/app.config';
 
 export abstract class AuthService {
     private static _userRepository: IUserRepository;
@@ -42,7 +43,7 @@ export abstract class AuthService {
      * @param payload Data to encode
      */
     public static generateJWTToken(payload: string | object | Buffer): string {
-        return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRATION, issuer: `https://${DOMAIN}` });
+        return jwt.sign(payload, Config.ENCRYPT_KEY, { expiresIn: JWT_EXPIRATION, issuer: `https://${DOMAIN}` });
     }
     
     /**
@@ -165,6 +166,7 @@ export abstract class AuthService {
                         surname: profile.name.familyName,
                         image: custom_image || profile.photos[0].value,
                         country: 'us',
+                        confirmed: true,
                         domain: provider,
                         oauth_id: profile.id
                     }

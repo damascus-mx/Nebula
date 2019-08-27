@@ -9,7 +9,6 @@
  */
 
 export const API_URI = '/api/v1';
-export const ENCRYPT_KEY = process.env.ENCRYPT_KEY;
 export const GENERIC_ERROR = 'Something went wrong';
 export const MISSING_FIELDS = 'Missing required fields';
 export const NOT_FOUND = 'not found';
@@ -22,5 +21,4 @@ export const INVALID_ID = 'Invalid ID';
 export const DOMAIN = 'damascus-engineering.com';
 export const APP_NAME = 'NigthLifeX';
 export const EMAIL_SUPPORT = `${APP_NAME.toLowerCase()}.support`;
-export const JWT_SECRET = process.env.ENCRYPT_KEY || 'null';
 export const JWT_EXPIRATION = '7d';

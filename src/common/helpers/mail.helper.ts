@@ -11,6 +11,7 @@
 import nodemailer from 'nodemailer';
 import Mail from 'nodemailer/lib/mailer';
 import AWS from 'aws-sdk';
+import Config from '../config';
 import { DOMAIN } from '../config/app.config';
 
 export default class MailHelper {
@@ -18,9 +19,9 @@ export default class MailHelper {
     private static instance: MailHelper;
 
     private constructor() {
-        AWS.config.accessKeyId = process.env.SMTP_USER;
-        AWS.config.secretAccessKey = process.env.SMTP_PASSWORD;
-        AWS.config.region = process.env.AWS_SMTP_REGION;
+        AWS.config.accessKeyId = Config.aws.SES_ACCESS_KEY;
+        AWS.config.secretAccessKey = Config.aws.SES_SECRET_KEY;
+        AWS.config.region = Config.aws.SES_REGION;
 
         MailHelper._transporter =  !MailHelper._transporter ? 
         nodemailer.createTransport({

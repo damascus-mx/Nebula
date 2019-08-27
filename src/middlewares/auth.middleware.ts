@@ -11,7 +11,8 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from 'express-jwt';
 import _ from "lodash";
-import { JWT_SECRET, DOMAIN } from "../common/config/app.config";
+import Config from '../common/config';
+import { DOMAIN } from "../common/config/app.config";
 
 /**
  * Login Required middleware.
@@ -34,7 +35,7 @@ const isAuthorized = (req: Request, res: Response, next: NextFunction) => {
 };
 
 export default jwt({
-    secret: JWT_SECRET,
+    secret: Config.ENCRYPT_KEY,
     getToken: isAuthenticated,
     credentialsRequired: true,
     issuer: `https://${DOMAIN}`

@@ -9,6 +9,7 @@
  */
 
 import { Sequelize } from 'sequelize';
+import Config from '../common/config';
 
 export abstract class PoolInstance {
     private static _Pool: Sequelize;
@@ -18,5 +19,5 @@ export abstract class PoolInstance {
     /**
      * @description Returns a database connection / pool instance
      */
-    public static getInstance(): Sequelize { return !this._Pool ? new Sequelize(process.env.LOCAL_DB || '', { logging: false }) : this._Pool; }
+    public static getInstance(): Sequelize { return !this._Pool ? new Sequelize(Config.db.LOCAL_DB || '', { logging: false }) : this._Pool; }
 }
