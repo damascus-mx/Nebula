@@ -11,7 +11,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 export default {
-    ENVIROMENT: process.env.NODE_ENV || 'production',
+    ENVIROMENT: process.env.NODE_ENV || 'development',
     ENCRYPT_KEY: process.env.ENCRYPT_KEY || 'null',
     EXPRESS_PORT: process.env.PORT || 5000,
     db: {

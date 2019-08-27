@@ -9,7 +9,7 @@
  */
 
 // Required libs
-import express, { Request, Response, NextFunction } from 'express';
+import express from 'express';
 import compression  from 'compression';
 import * as bodyParser from 'body-parser';
 import morgan from 'morgan';
