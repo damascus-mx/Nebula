@@ -18,6 +18,7 @@ import IUserController from '../../core/controllers/user.controller';
 import { IMailHelper } from '../../core/helpers/mail.interface';
 import { IAuthService } from '../../core/services/auth.interface';
 import { ITokenRepository } from '../../core/repositories/token.repository';
+import { IPassportConfig } from '../../core/config/passport.interface';
 
 
 // Implementations
@@ -27,11 +28,13 @@ import { UserController } from '../../controllers/user.controller';
 import MailHelper from '../helpers/mail.helper';
 import { AuthService } from '../../services/auth.service';
 import { TokenRepository } from '../../infrastructure/repositories/token.repository';
+import { PassportConfig } from './passport.config';
 
 
 const nebulaContainer = new Container();
 nebulaContainer.bind<IUserController>(TYPES.UserController).to(UserController);
 nebulaContainer.bind<IMailHelper>(TYPES.MailHelper).to(MailHelper).inSingletonScope();
+nebulaContainer.bind<IPassportConfig>(TYPES.PassportConfig).to(PassportConfig).inSingletonScope();
 nebulaContainer.bind<IAuthService>(TYPES.AuthService).to(AuthService);
 nebulaContainer.bind<IUserService>(TYPES.UserService).to(UserService);
 nebulaContainer.bind<ITokenRepository>(TYPES.TokenReposity).to(TokenRepository);

@@ -18,11 +18,14 @@ import { TYPES } from '../common/config/types';
 const api = Router();
 const controller: IUserController = nebulaContainer.get<IUserController>(TYPES.UserController);
 
-api.route('/user').post(controller.Create);
-api.route('/user/:id').put(isAuthenticated, controller.Update);
-api.route('/user/:id').delete(isAuthenticated, isInRole(['ROLE_ADMIN', 'ROLE_SUPPORT']), controller.Delete);
-api.route('/user').get(isAuthenticated, controller.GetAll);
-api.route('/user/:id').get(isAuthenticated, controller.GetById);
+api.route('/user')
+.post(controller.Create)
+.get(isAuthenticated, controller.GetAll);
+
+api.route('/user/:id')
+.put(isAuthenticated, controller.Update)
+.delete(isAuthenticated, isInRole(['ROLE_ADMIN', 'ROLE_SUPPORT']), controller.Delete)
+.get(isAuthenticated, controller.GetById);
 
 // Auth
 api.route('/account/user').post(controller.LogIn);

@@ -15,7 +15,8 @@ const TYPES = {
     UserService: Symbol.for('UserService'),
     UserController: Symbol.for('UserController'),
     MailHelper: Symbol.for('MailHelper'),
-    AuthService: Symbol.for('AuthService')
+    AuthService: Symbol.for('AuthService'),
+    PassportConfig: Symbol.for('PassportConfig')
 }
 
 export { TYPES };

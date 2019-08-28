@@ -20,7 +20,9 @@ import lusca from "lusca";
 import passport from "passport";
 
 // Custom libs
-import * as passportConfig from '../common/config/passport.config';
+import { nebulaContainer } from '../common/config/inversify.config';
+import { IPassportConfig } from '../core/config/passport.interface';
+import { TYPES } from '../common/config/types';
 
 // Const
 const app = express();
@@ -48,7 +50,7 @@ app.use(morgan("combined", { stream: accessLogStream }));
 
 // Passport Auth
 app.use(passport.initialize());
-passportConfig.default();
+const passportConfig: IPassportConfig = nebulaContainer.get<IPassportConfig>(TYPES.PassportConfig);
 
 // LUSCA
 app.use(lusca.xframe("SAMEORIGIN"));
