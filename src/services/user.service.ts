@@ -14,22 +14,30 @@ import { NOT_FOUND, APP_NAME, EMAIL_SUPPORT } from "../common/config/app.config"
 import IUserRepository from "../core/repositories/user.repository";
 import { IUser } from "../domain/models/user.model";
 import IUserService from "../core/services/user.interface";
-// Repository
-import { UserRepository } from "../infrastructure/repositories/user.repository";
 
 // Auth
 // - Cryptographic
 import bcrypt from 'bcryptjs';
-import { AuthService } from "../services/auth.service";
-import MailHelper from "../common/helpers/mail.helper";
 import { Sequelize } from 'sequelize';
+import { injectable, inject } from "inversify";
+import { TYPES } from "../common/config/types";
+import { IMailHelper } from "../core/helpers/mail.interface";
+import { IAuthService } from "../core/services/auth.interface";
 
-
+@injectable()
 export default class UserService implements IUserService {
     private static _userRepository: IUserRepository;
+    private static _mailHelper: IMailHelper;
+    private static _authService: IAuthService;
 
-    constructor() {
-        UserService._userRepository = !UserService._userRepository ? new UserRepository() : UserService._userRepository;
+    constructor(
+        @inject(TYPES.UserRepository) userRepository: IUserRepository,
+        @inject(TYPES.MailHelper) mailHelper: IMailHelper,
+        @inject(TYPES.AuthService) authService: IAuthService
+    ) {
+        UserService._userRepository = userRepository;
+        UserService._mailHelper = mailHelper;
+        UserService._authService = authService;
     }
 
     async create(payload: any): Promise<IUser> {
@@ -100,14 +108,13 @@ export default class UserService implements IUserService {
             const user = await UserService._userRepository.GetById(Id);
             if (!user) throw new Error(`User ${NOT_FOUND}`);
 
-            if ( await AuthService.verifyPassword(payload.old_password, user.password) ) {
+            if ( await UserService._authService.verifyPassword(payload.old_password, user.password) ) {
                 const cipherText = await bcrypt.hash(payload.new_password, 10);
                 UserService._userRepository.Update(user.id, {password: cipherText, updated_at: new Date()});
 
-                const mailHelper = MailHelper.getInstance();
                 const message = `Hey, ${user.name}.\n\nYour password just changed at ${new Date().toString()}.\nPlease, feel free to contact us if it wasn't you.\n\n`+
                                 `Greetings,\n${APP_NAME}'s Team`;
-                mailHelper.sendMail([user.email], EMAIL_SUPPORT, 'Your password has changed', message, APP_NAME)
+                UserService._mailHelper.sendMail([user.email], EMAIL_SUPPORT, 'Your password has changed', message, APP_NAME)
                 .then(success => success)
                 .catch(error => console.log(`Error sending email to ${user.email}`));
 
@@ -128,10 +135,9 @@ export default class UserService implements IUserService {
             const cipherText = await bcrypt.hash(password, 10);
             UserService._userRepository.Update(Id, { password: cipherText, updated_at: new Date() });
 
-            const mailHelper = MailHelper.getInstance();
             const message = `Hey, ${user.name}.\n\nYour password just changed at ${new Date().toString()}.\nPlease, feel free to contact us if it wasn't you.\n\n`+
                             `Greetings,\n${APP_NAME}'s Team`;
-            mailHelper.sendMail([user.email], EMAIL_SUPPORT, 'Your password has changed', message, APP_NAME)
+            UserService._mailHelper.sendMail([user.email], EMAIL_SUPPORT, 'Your password has changed', message, APP_NAME)
             .then(success => success)
             .catch(error => console.log(`Error sending email to ${user.email}`));
 
@@ -145,7 +151,7 @@ export default class UserService implements IUserService {
     async forceSignIn(user: string): Promise<string> {
         try {
             const userToJWT = await UserService._userRepository.FindOne(Sequelize.or({ username: user.toLowerCase() }, { email: user.toLowerCase() }));
-            return AuthService.generateJWTToken(userToJWT);
+            return UserService._authService.generateJWTToken(userToJWT);
         } catch (error) {
             throw error;
         }

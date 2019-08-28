@@ -10,7 +10,9 @@
 
 import { User, IUser } from "../../domain/models/user.model";
 import IUserRepository from "../../core/repositories/user.repository";
+import { injectable } from 'inversify';
 
+@injectable()
 export class UserRepository implements IUserRepository {
 
     constructor() {

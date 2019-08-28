@@ -12,18 +12,20 @@ import passport from "passport";
 import passportLocal from "passport-local";
 import passportFacebook from "passport-facebook";
 import passportGoogle from "passport-google-oauth";
-import { UserRepository } from '../../infrastructure/repositories/user.repository'
-import { AuthService } from "../../services/auth.service";
 import IUserRepository from "../../core/repositories/user.repository";
 import { Sequelize } from "sequelize";
 import Config from './';
 import { Request } from "express";
 import { ProviderEnum } from "../enums/provider.enum";
+import { nebulaContainer } from "./inversify.config";
+import { TYPES } from "./types";
+import { IAuthService } from "../../core/services/auth.interface";
 
 const LocalStrategy = passportLocal.Strategy;
 const FacebookStrategy = passportFacebook.Strategy;
 const GoogleStrategy = passportGoogle.OAuth2Strategy;
-const _userRepository: IUserRepository = new UserRepository();
+const _userRepository: IUserRepository = nebulaContainer.get<IUserRepository>(TYPES.UserRepository);
+const _authService: IAuthService = nebulaContainer.get<IAuthService>(TYPES.AuthService);
 
 export default () => {
     passport.serializeUser<any, any>((user, done) => {
@@ -40,7 +42,7 @@ export default () => {
     passport.use(new LocalStrategy((user, password, done) => {
         _userRepository.FindOne(Sequelize.or({ username: user.toLowerCase() }, { email: user.toLowerCase() })).then(async (user) => {
             if (!user) return done(undefined, false, { message: 'User not found' })
-            return await AuthService.verifyPassword(password, user.password) ? done(undefined, user) : done(undefined, false, { message: "Invalid username or password." });
+            return await _authService.verifyPassword(password, user.password) ? done(undefined, user) : done(undefined, false, { message: "Invalid username or password." });
         })
         .catch(e => done(e));
     }));
@@ -56,7 +58,7 @@ export default () => {
         callbackURL: '/api/v1/connect/facebook/callback',
         profileFields: ["name", "email", "picture", "link", "displayName", "location", "friends"],
         passReqToCallback: true
-    }, (req: Request, accessToken: string, refreshToken: string, profile: any, done) => { AuthService.handleOAuth2(req, accessToken, refreshToken, profile, done, ProviderEnum.FACEBOOK) }
+    }, (req: Request, accessToken: string, refreshToken: string, profile: any, done) => { _authService.handleOAuth2(req, accessToken, refreshToken, profile, done, ProviderEnum.FACEBOOK) }
     ));
 
     passport.use(new GoogleStrategy({
@@ -64,6 +66,6 @@ export default () => {
         clientSecret: Config.google.APP_SECRET || 'null',
         callbackURL: '/api/v1/connect/google/callback',
         passReqToCallback: true
-    }, (req: any, accessToken: any, refreshToken: any, profile: any, done: any ) => { AuthService.handleOAuth2(req, accessToken, refreshToken, profile, done, ProviderEnum.GOOGLE) }
+    }, (req: any, accessToken: any, refreshToken: any, profile: any, done: any ) => { _authService.handleOAuth2(req, accessToken, refreshToken, profile, done, ProviderEnum.GOOGLE) }
     ));
 }

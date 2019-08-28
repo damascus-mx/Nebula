@@ -10,8 +10,10 @@
 
 import { ITokenRepository } from "../../core/repositories/token.repository";
 import { Token, IToken } from "../../domain/models/token.model";
+import { injectable } from "inversify";
 
- export class TokenRepository implements ITokenRepository {
+@injectable()
+export class TokenRepository implements ITokenRepository {
 
     constructor() {}
 
@@ -57,4 +59,4 @@ import { Token, IToken } from "../../domain/models/token.model";
         return Token.findAll({ raw: true, where: args, limit: limit, offset: page })
         .then(tokens => tokens).catch(e => e);
     }
- }
+}

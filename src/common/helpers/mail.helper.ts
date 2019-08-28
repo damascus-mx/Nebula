@@ -13,12 +13,14 @@ import Mail from 'nodemailer/lib/mailer';
 import AWS from 'aws-sdk';
 import Config from '../config';
 import { DOMAIN } from '../config/app.config';
+import { injectable } from 'inversify';
+import { IMailHelper } from '../../core/helpers/mail.interface';
 
-export default class MailHelper {
+@injectable()
+export default class MailHelper implements IMailHelper {
     private static _transporter: Mail;
-    private static instance: MailHelper;
 
-    private constructor() {
+    constructor() {
         AWS.config.accessKeyId = Config.aws.SES_ACCESS_KEY;
         AWS.config.secretAccessKey = Config.aws.SES_SECRET_KEY;
         AWS.config.region = Config.aws.SES_REGION;
@@ -72,7 +74,4 @@ export default class MailHelper {
             throw error;
         }
     }
-
-    static getInstance(): MailHelper { return !this.instance ? new MailHelper() : this.instance; }
-
 }

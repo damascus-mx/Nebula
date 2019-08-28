@@ -11,20 +11,33 @@
 import bcrypt from 'bcryptjs';
 import { Request } from 'express';
 import IUserRepository from '../core/repositories/user.repository';
-import { UserRepository } from '../infrastructure/repositories/user.repository';
 import { ITokenRepository } from '../core/repositories/token.repository';
-import { TokenRepository } from '../infrastructure/repositories/token.repository';
 import { IToken } from '../domain/models/token.model';
 import { IUser } from '../domain/models/user.model';
 import { SHA256 } from 'crypto-js';
 import jwt from 'jsonwebtoken';
-import EmailHelper from '../common/helpers/mail.helper';
 import Config from '../common/config';
 import { APP_NAME, FAILED_CREATE, JWT_EXPIRATION, DOMAIN } from '../common/config/app.config';
+import { injectable, inject } from 'inversify';
+import { TYPES } from '../common/config/types';
+import { IMailHelper } from '../core/helpers/mail.interface';
+import { IAuthService } from '../core/services/auth.interface';
 
-export abstract class AuthService {
+@injectable()
+export class AuthService implements IAuthService {
     private static _userRepository: IUserRepository;
     private static _tokenRepository: ITokenRepository;
+    private static _mailHelper: IMailHelper;
+
+    constructor(
+        @inject(TYPES.MailHelper) mailHelper: IMailHelper,
+        @inject(TYPES.UserRepository) userRepository: IUserRepository,
+        @inject(TYPES.TokenReposity) tokenRepository: ITokenRepository
+    ) {
+        AuthService._mailHelper = mailHelper;
+        AuthService._tokenRepository = tokenRepository;
+        AuthService._userRepository = userRepository;
+    }
 
     /**
      * @description Verifies password using bcrypt algorithm
@@ -32,7 +45,7 @@ export abstract class AuthService {
      * @param cipher Hashed password
      * @returns Boolean within Promise
      */
-    public static async verifyPassword(password: string, cipher: string): Promise<boolean> {
+    public async verifyPassword(password: string, cipher: string): Promise<boolean> {
         return bcrypt.compare(password, cipher)
         .then(result => result)
         .catch(e => false);
@@ -42,7 +55,7 @@ export abstract class AuthService {
      * @description Generates JWT Token
      * @param payload Data to encode
      */
-    public static generateJWTToken(payload: string | object | Buffer): string {
+    public generateJWTToken(payload: string | object | Buffer): string {
         return jwt.sign(payload, Config.ENCRYPT_KEY, { expiresIn: JWT_EXPIRATION, issuer: `https://${DOMAIN}` });
     }
     
@@ -56,14 +69,10 @@ export abstract class AuthService {
      * @param provider Provider type
      * @returns Promise
      */
-    public static async handleOAuth2(req: Request, accessToken: string, refreshToken: string, profile: any, done: any, provider: string): Promise<any> {
-
-        if (!this._userRepository) this._userRepository = new UserRepository();
-        if (!this._tokenRepository) this._tokenRepository = new TokenRepository();
-        const emailHelper = EmailHelper.getInstance();
+    public async handleOAuth2(req: Request, accessToken: string, refreshToken: string, profile: any, done: any, provider: string): Promise<any> {
 
         try {
-            const user = await this._userRepository.FindOne({oauth_id: profile.id});
+            const user = await AuthService._userRepository.FindOne({oauth_id: profile.id});
 
             // User logged
             if (req.user) {
@@ -73,7 +82,7 @@ export abstract class AuthService {
                     if ( user.id === req.user.id ) {
                         // Refresh token and return user
                         try {
-                            const lastToken = await this._tokenRepository.GetById(user.id);
+                            const lastToken = await AuthService._tokenRepository.GetById(user.id);
         
                             const token: IToken = {
                                 kind: provider,
@@ -82,8 +91,8 @@ export abstract class AuthService {
                                 updated_at: new Date()
                             }
         
-                            return lastToken ?  this._tokenRepository.Update(lastToken.id, token).then(token => done(null, user)).catch(e => done(e, null)) : 
-                            this._tokenRepository.Create(token).then(token => done(null, user) ).catch(e => done(e, null));
+                            return lastToken ?  AuthService._tokenRepository.Update(lastToken.id, token).then(token => done(null, user)).catch(e => done(e, null)) : 
+                            AuthService._tokenRepository.Create(token).then(token => done(null, user) ).catch(e => done(e, null));
         
                         } catch (error) {
                             throw error;
@@ -107,14 +116,14 @@ export abstract class AuthService {
                     }
     
                     try {
-                        const response: any = await this._userRepository.Update(req.user.id, updatedUser);
+                        const response: any = await AuthService._userRepository.Update(req.user.id, updatedUser);
 
                         if ( !response.errors ) {
                             // Send email
                             const message = `Hello, ${updatedUser.name}.\n\nYour account (${response.username}) has been linked succesfuly to your ${provider} account.\n`+
                             `You may now log in with your ${provider} account.\n\nThank you for using ${APP_NAME}.\nSincerely,\n ${APP_NAME}'s Team`;
                             
-                            emailHelper.sendMail([response.email], APP_NAME.toLowerCase(), `Successfuly linked your ${provider} account`, message, APP_NAME )
+                            AuthService._mailHelper.sendMail([response.email], APP_NAME.toLowerCase(), `Successfuly linked your ${provider} account`, message, APP_NAME )
                             .then(success => success)
                             .catch(e => e);
 
@@ -124,7 +133,7 @@ export abstract class AuthService {
                                 fk_user: response.id || 0
                             };
 
-                            this._tokenRepository.Create(token).then(token => done(null, response) ).catch(e => new Error(e));
+                            AuthService._tokenRepository.Create(token).then(token => done(null, response) ).catch(e => new Error(e));
                             
                         } else done(response.errors[0], null);
 
@@ -137,7 +146,7 @@ export abstract class AuthService {
                 if (user) {
     
                     try {
-                        const lastToken = await this._tokenRepository.GetById(user.id);
+                        const lastToken = await AuthService._tokenRepository.GetById(user.id);
     
                         const token: IToken = {
                             kind: provider,
@@ -146,8 +155,8 @@ export abstract class AuthService {
                             updated_at: new Date()
                         }
     
-                        return lastToken ?  this._tokenRepository.Update(lastToken.id, token).then(token => done(null, user)).catch(e => done(e, null)) : 
-                        this._tokenRepository.Create(token).then(token => done(null, user) ).catch(e => done(e, null));
+                        return lastToken ?  AuthService._tokenRepository.Update(lastToken.id, token).then(token => done(null, user)).catch(e => done(e, null)) : 
+                        AuthService._tokenRepository.Create(token).then(token => done(null, user) ).catch(e => done(e, null));
     
                     } catch (error) {
                         throw error;
@@ -172,7 +181,7 @@ export abstract class AuthService {
                     }
     
                     try {
-                        const userCreated: IUser = await this._userRepository.Create(newUser);
+                        const userCreated: IUser = await AuthService._userRepository.Create(newUser);
 
                         if ( userCreated ) {
                             // Send email
@@ -181,7 +190,7 @@ export abstract class AuthService {
                             `Password: ${SHA256(profile.id).toString().substring(0, 10)}\n`+
                             `You can also log in with your ${provider} account.\n\nThank you for using ${APP_NAME}.\nSincerely,\n${APP_NAME}'s Team`;
 
-                            emailHelper.sendMail([userCreated.email], APP_NAME.toLowerCase(), `Welcome to ${APP_NAME}!`, message, APP_NAME )
+                            AuthService._mailHelper.sendMail([userCreated.email], APP_NAME.toLowerCase(), `Welcome to ${APP_NAME}!`, message, APP_NAME )
                             .then(success => success)
                             .catch(e => e);
 
@@ -192,7 +201,7 @@ export abstract class AuthService {
                                 fk_user: userCreated.id || 0
                             };
 
-                            this._tokenRepository.Create(token).then(token => done(null, userCreated) ).catch(e => new Error(e));
+                            AuthService._tokenRepository.Create(token).then(token => done(null, userCreated) ).catch(e => new Error(e));
                             
                         } else done(new Error(`User ${FAILED_CREATE}`), null);
 

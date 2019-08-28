@@ -16,20 +16,24 @@ import { check, sanitize, validationResult } from "express-validator";
 // Interfaces - Implementations
 import IUserController from "../core/controllers/user.controller";
 import IUserService from "../core/services/user.interface";
-import UserService from "../services/user.service";
 import { IUser } from "../domain/models/user.model";
 
 // Auth
 // - OAuth2
 import passport = require("passport");
 import { IVerifyOptions } from "passport-local";
-import { AuthService } from "../services/auth.service";
+import { inject, injectable } from "inversify";
+import { TYPES } from "../common/config/types";
+import { IAuthService } from "../core/services/auth.interface";
 
+@injectable()
 export class UserController implements IUserController {
     private static _userService: IUserService;
+    private static _authService: IAuthService;
 
-    constructor() {
-        UserController._userService = new UserService();
+    constructor(@inject(TYPES.UserService) userService: IUserService, @inject(TYPES.AuthService) authService: IAuthService ) {
+        UserController._userService = userService;
+        UserController._authService = authService;
     }
 
     async Create(req: Request, res: Response) {
@@ -112,7 +116,7 @@ export class UserController implements IUserController {
 
                 if (!user) return res.status(404).send({message: FAILED_AUTH});
 
-                const jwtUser = AuthService.generateJWTToken(user);
+                const jwtUser = UserController._authService.generateJWTToken(user);
 
                 return res.status(200).send({jwt: jwtUser});
             })(req, res);

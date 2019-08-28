@@ -10,12 +10,13 @@
 
 import { Router } from 'express';
 import IUserController from '../core/controllers/user.controller';
-import { UserController } from '../controllers/user.controller';
 import isAuthenticated from '../middlewares/auth.middleware';
 import isInRole from '../middlewares/role.middleware';
+import { nebulaContainer } from '../common/config/inversify.config';
+import { TYPES } from '../common/config/types';
 
 const api = Router();
-const controller: IUserController = new UserController();
+const controller: IUserController = nebulaContainer.get<IUserController>(TYPES.UserController);
 
 api.route('/user').post(controller.Create);
 api.route('/user/:id').put(isAuthenticated, controller.Update);
