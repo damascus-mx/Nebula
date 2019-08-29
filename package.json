@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node ./dist/bin/server.js",
-    "test": "mocha 'test/**/*.ts'",
+    "test": "mocha -r ts-node/register src/**/*.spec.ts",
     "dev": "ts-node-dev --respawn --transpileOnly ./src/bin/server.ts",
     "prod": "tsc && node ./dist/bin/server.js",
     "watch": "nodemon",
@@ -80,6 +80,7 @@
     "morgan": "^1.9.1",
     "nodemon": "^1.19.1",
     "rotating-file-stream": "^1.4.3",
+    "ts-node": "^8.3.0",
     "ts-node-dev": "^1.0.0-pre.40",
     "typescript": "^3.5.3"
   }
