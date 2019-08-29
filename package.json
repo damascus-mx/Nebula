@@ -23,6 +23,7 @@
   "homepage": "https://github.com/damascus-mx/Nebula#readme",
   "dependencies": {
     "@elastic/elasticsearch": "^7.3.0",
+    "app-root-path": "^2.2.1",
     "async": "^3.1.0",
     "aws-sdk": "^2.510.0",
     "bcryptjs": "^2.4.3",
@@ -51,6 +52,7 @@
     "uuid": "^3.3.2"
   },
   "devDependencies": {
+    "@types/app-root-path": "^1.2.4",
     "@types/bcryptjs": "^2.4.2",
     "@types/bluebird": "^3.5.27",
     "@types/chai": "^4.2.0",
@@ -59,6 +61,7 @@
     "@types/dotenv": "^6.1.1",
     "@types/express": "^4.17.0",
     "@types/express-jwt": "0.0.42",
+    "@types/formidable": "^1.0.31",
     "@types/inversify": "^2.0.33",
     "@types/jsonwebtoken": "^8.3.3",
     "@types/lodash": "^4.14.137",

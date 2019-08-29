@@ -22,3 +22,5 @@ export const DOMAIN = 'damascus-engineering.com';
 export const APP_NAME = 'NigthLifeX';
 export const EMAIL_SUPPORT = `${APP_NAME.toLowerCase()}.support`;
 export const JWT_EXPIRATION = '7d';
+export const FILE_ERROR = 'Error uploading file';
+export const FILE_INVALID_EXTENSION = 'Not a valid file type'

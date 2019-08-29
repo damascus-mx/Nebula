@@ -23,7 +23,11 @@ export default {
         SECRET_KEY: process.env.AWS_SECRET_ACCESS_KEY || 'null',
         SES_REGION: process.env.AWS_SMTP_REGION || 'null',
         SES_ACCESS_KEY: process.env.AWS_SES_ACCESS_KEY || 'null',
-        SES_SECRET_KEY: process.env.AWS_SES_SECRET_KEY || ' null'
+        SES_SECRET_KEY: process.env.AWS_SES_SECRET_KEY || ' null',
+        S3_ACCESS_KEY: process.env.AWS_S3_ACCESS_KEY || 'null',
+        S3_SECRET_KEY: process.env.AWS_S3_SECRET_KEY || 'null',
+        RDS_ACCESS_KEY: process.env.AWS_RDS_ACCESS_KEY || 'null',
+        RDS_SECRET_KEY: process.env.AWS_RDS_SECRET_KEY || 'null'
     },
     facebook: {
         APP_ID: process.env.FACEBOOK_ID || 'null',

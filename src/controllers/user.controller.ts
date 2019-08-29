@@ -169,6 +169,20 @@ export class UserController implements IUserController {
     }
 
     /**
+     *  Formidable endpoints (File uploading)
+     */
+
+    
+    async UploadProfilePicture(req: Request, res: Response) {
+        try {
+            const uploaded = await UserController._userService.uploadProfilePicture(req);
+            res.status(200).send({message: 'OK'});
+        } catch (error) {
+            res.status(400).send({message: GENERIC_ERROR, error: error.message});
+        }
+    }
+
+    /**
      * OAuth2 Helpers / Callbacks
      */
 

@@ -36,6 +36,7 @@ api.route('/support/account/user').post(isAuthenticated, isInRole(['ROLE_ADMIN',
 
 // User related
 api.route('/testing/user').get(isAuthenticated, isInRole(['ROLE_USER']), controller.GetAll);
+api.route('/account/io/profilepic').post(controller.UploadProfilePicture);
 
 // - OAuth2
 api.route('/connect/facebook').get(controller.Facebook);
