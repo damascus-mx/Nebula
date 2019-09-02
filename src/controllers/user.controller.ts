@@ -176,7 +176,7 @@ export class UserController implements IUserController {
     async UploadProfilePicture(req: Request, res: Response) {
         try {
             const uploaded = await UserController._userService.uploadProfilePicture(req);
-            res.status(200).send({message: 'OK'});
+            res.status(200).send({message: uploaded});
         } catch (error) {
             res.status(400).send({message: GENERIC_ERROR, error: error.message});
         }

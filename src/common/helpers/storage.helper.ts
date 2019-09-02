@@ -15,6 +15,7 @@ import path from 'path';
 
 @injectable()
 export default class StorageHelper implements IStorageHelper {
+
     async createDirectory(filePath: string): Promise<boolean> {
         return new Promise((resolve: any, reject: any) => {
             fs.mkdir(filePath, (err) => {
@@ -30,4 +31,13 @@ export default class StorageHelper implements IStorageHelper {
             });
         });
     }
+
+    async deleteFile(filePath: string): Promise<any> {
+        return new Promise((resolve: any, reject: any) => {
+            fs.unlink(filePath, (err) => {
+                err ? reject(err) : resolve(true);
+            });
+        });
+    }
+
 }

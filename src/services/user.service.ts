@@ -14,23 +14,28 @@ import { NOT_FOUND, APP_NAME, EMAIL_SUPPORT, FILE_ERROR, FILE_INVALID_EXTENSION 
 import IUserRepository from "../core/repositories/user.repository";
 import { IUser } from "../domain/models/user.model";
 import IUserService from "../core/services/user.interface";
+import { IMailHelper } from "../core/helpers/mail.interface";
+import { IAuthService } from "../core/services/auth.interface";
+import { IStorageHelper } from "../core/helpers/storage.helper";
+
+// Misc
+import { injectable, inject } from "inversify";
+import { TYPES } from "../common/config/types";
+import { Request } from "express";
+import enviroment from '../common/config';
 
 // Formidable - File uploading
 import path from 'path';
 import formidable, { File } from 'formidable';
 import rootpath from 'app-root-path';
 import uuid from 'uuid/v4';
+import sharp from 'sharp';
+import AWS from 'aws-sdk';
 
 // Auth
 // - Cryptographic
 import bcrypt from 'bcryptjs';
 import { Sequelize } from 'sequelize';
-import { injectable, inject } from "inversify";
-import { TYPES } from "../common/config/types";
-import { IMailHelper } from "../core/helpers/mail.interface";
-import { IAuthService } from "../core/services/auth.interface";
-import { Request } from "express";
-import { IStorageHelper } from "../core/helpers/storage.helper";
 
 @injectable()
 export default class UserService implements IUserService {
@@ -187,7 +192,7 @@ export default class UserService implements IUserService {
             form.parse(req);
             const extensions: Array<string> = ['.jpg', '.png', '.jpeg'];
             
-            const localFile: string = await new Promise( (resolve: any, reject: any) => {
+            const localFile: File = await new Promise( (resolve: any, reject: any) => {
 
                 try {
                     form.on('fileBegin', (name, file: File) => {
@@ -198,7 +203,7 @@ export default class UserService implements IUserService {
                     });
     
                     form.on('file', (name, file: File) => {
-                        resolve(file.name);
+                        resolve(file);
                     });
 
                     form.on('error', (message: string) => {
@@ -210,10 +215,22 @@ export default class UserService implements IUserService {
             });
 
 
-            const newFileName = `${uuid()}${path.extname(localFile)}`;
-            const renameFile = await UserService._storageHelper.renameFile(`${uploadDir}/${localFile}`, `${uploadDir}/${newFileName}`);
+            const newFileName = `${uuid()}${path.extname(localFile.name)}`;
+            const sharpedImage = await sharp(`${uploadDir}/${localFile.name}`).resize(250, 250).toBuffer(); // .toFile(`${uploadDir}/${newFileName}`);
+            
+            const deleteFile = await UserService._storageHelper.deleteFile(`${uploadDir}/${localFile.name}`);
 
-            console.log(renameFile);
+            const S3 = new AWS.S3({accessKeyId: enviroment.aws.S3_ACCESS_KEY, secretAccessKey: enviroment.aws.S3_SECRET_KEY, region: enviroment.aws.S3_CDN_REGION });
+            const upload = await S3.upload({
+                Bucket: 'cdn.damascus-engineering.com/andromeda/users',
+                Key: newFileName,
+                Body: sharpedImage,
+                ContentType: localFile.type
+            });
+
+            const data: AWS.S3.ManagedUpload.SendData = await upload.promise().then(data => data).catch(e => e);
+
+            return data.Location;
             
         } catch (error) {
             throw error;

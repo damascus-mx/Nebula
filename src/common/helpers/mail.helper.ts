@@ -21,9 +21,11 @@ export default class MailHelper implements IMailHelper {
     private static _transporter: Mail;
 
     constructor() {
-        AWS.config.accessKeyId = Config.aws.SES_ACCESS_KEY;
-        AWS.config.secretAccessKey = Config.aws.SES_SECRET_KEY;
-        AWS.config.region = Config.aws.SES_REGION;
+        AWS.config.update({
+            accessKeyId: Config.aws.SES_ACCESS_KEY,
+            secretAccessKey: Config.aws.SES_SECRET_KEY,
+            region: Config.aws.SES_REGION
+        })
 
         MailHelper._transporter =  !MailHelper._transporter ? 
         nodemailer.createTransport({

@@ -26,6 +26,7 @@ export default {
         SES_SECRET_KEY: process.env.AWS_SES_SECRET_KEY || ' null',
         S3_ACCESS_KEY: process.env.AWS_S3_ACCESS_KEY || 'null',
         S3_SECRET_KEY: process.env.AWS_S3_SECRET_KEY || 'null',
+        S3_CDN_REGION: process.env.AWS_S3_CDN_REGION || 'null',
         RDS_ACCESS_KEY: process.env.AWS_RDS_ACCESS_KEY || 'null',
         RDS_SECRET_KEY: process.env.AWS_RDS_SECRET_KEY || 'null'
     },
