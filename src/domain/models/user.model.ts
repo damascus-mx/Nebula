@@ -1,3 +1,13 @@
+/**
+ * @name Nebula
+ * @version 0.0.1a
+ * @copyright Damascus Engineering. 2019 All rights reserved.
+ * @license Confidential This file belongs to Damascus Engineering intellectual property,
+ * any unauthorized distribution of this file will be punished by law.
+ * @author Alonso Ruiz
+ * @description Exports User class / interface model
+ */
+
 import { Model, DataTypes } from 'sequelize';
 import { PoolInstance } from '../../infrastructure/pool';
 
@@ -18,6 +28,8 @@ export interface IUser {
     country: string,
     theme_hex?: string | null,
     role?: string,
+    domain?: string | null,
+    oauth_id?: string | null,
     private?: boolean,
     verified?: boolean,
     confirmed?: boolean,
@@ -43,6 +55,8 @@ export class User extends Model implements IUser {
     public country!: string;
     public theme_hex?: string | null;
     public role!: string;
+    public domain?: string | null;
+    public oauth_id?: string | null;
     public private!: boolean
     public verified!: boolean;
     public confirmed!: boolean;
@@ -52,7 +66,7 @@ export class User extends Model implements IUser {
 
 
     public static startModel() {
-        User.init({
+        this.init({
             id: {
                 type: DataTypes.BIGINT,
                 autoIncrement: true,
@@ -82,11 +96,11 @@ export class User extends Model implements IUser {
                 allowNull: false
             },
             image: {
-                type: DataTypes.STRING(255),
+                type: DataTypes.TEXT,
                 allowNull: true
             },
             cover: {
-                type: DataTypes.STRING(255),
+                type: DataTypes.TEXT,
                 allowNull: true
             },
             bio: {
@@ -123,18 +137,30 @@ export class User extends Model implements IUser {
                 defaultValue: 'ROLE_USER',
                 allowNull: false
             },
+            domain: {
+                type: DataTypes.STRING(255),
+                allowNull: true
+            },
+            oauth_id: {
+                type: DataTypes.TEXT,
+                allowNull: true,
+                unique: true
+            },
             private: {
                 type: DataTypes.BOOLEAN,
                 defaultValue: true
             },
             verified: {
-                type: DataTypes.BOOLEAN
+                type: DataTypes.BOOLEAN,
+                defaultValue: false
             },
             confirmed: {
-                type: DataTypes.BOOLEAN
+                type: DataTypes.BOOLEAN,
+                defaultValue: false
             },
             active: {
-                type: DataTypes.BOOLEAN
+                type: DataTypes.BOOLEAN,
+                defaultValue: true
             },
             created_at: {
                 type: DataTypes.DATE,
@@ -151,6 +177,6 @@ export class User extends Model implements IUser {
             tableName: 'users',
             timestamps: false,
             sequelize: PoolInstance.getInstance()
-         });
+        });
     }
 }

@@ -5,11 +5,14 @@
  * @license Confidential This file belongs to Damascus Engineering intellectual property,
  * any unauthorized distribution of this file will be punished by law.
  * @author Alonso Ruiz
- * @description Sets UserRepository actions
+ * @description Exports routing
  */
 
-import { IUser } from "../../domain/models/user.model";
-import { IRepository } from "../repository";
+import { Router } from 'express';
+import UserRoutes from './user.routes';
+import { API_URI } from '../common/config/app.config';
+const routes = Router();
 
-export default interface IUserRepository extends IRepository<IUser> {
-}
+routes.use(API_URI, UserRoutes);
+
+export default routes;

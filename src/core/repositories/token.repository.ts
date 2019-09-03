@@ -5,11 +5,9 @@
  * @license Confidential This file belongs to Damascus Engineering intellectual property,
  * any unauthorized distribution of this file will be punished by law.
  * @author Alonso Ruiz
- * @description Sets UserRepository actions
+ * @description Sets TokenRepository actions
  */
-
-import { IUser } from "../../domain/models/user.model";
 import { IRepository } from "../repository";
+import { IToken } from "../../domain/models/token.model";
 
-export default interface IUserRepository extends IRepository<IUser> {
-}
+export interface ITokenRepository extends IRepository<IToken> {}

@@ -1,16 +1,23 @@
-/**
- * @name Nebula for Andromeda
- * @version 0.0.1a
- * @copyright Damascus. 2019 All rights reserved.
- * @license Confidential This file belongs to Damascus IT intellectual property,
- * any unauthorized distribution of this file will be punished by law.
- * @author Alonso Ruiz
- * @description Main Nebula/Andromeda SQL Script
- */
+/******************************
+**	File:	nebula.sql
+**	Name:	Nebula
+**	Desc:	Nebula's cluster SQL script
+**	Auth:	Damascus Engineering
+**	Date:	2019
+**	Lisc:	Confidential - Closed
+**	Copy:	Damascus Engineering. 2019 All rights reserved.
+**************************
+** Change History
+**************************
+** PR   Date        Author  		Description 
+** --   --------   -------   		------------------------------------
+** 1    08/15/2019      Alonso R      Initial setup
+*******************************/
  
 -- Create schemas
 CREATE SCHEMA IF NOT EXISTS client;
 CREATE SCHEMA IF NOT EXISTS enterprise;
+CREATE SCHEMA IF NOT EXISTS auth;
 
 -- User table
 CREATE TABLE client.users (
@@ -20,8 +27,8 @@ CREATE TABLE client.users (
 	EMAIL VARCHAR(255) NOT NULL UNIQUE,
 	NAME VARCHAR(100) NOT NULL,
 	SURNAME VARCHAR(100) NOT NULL,
-	IMAGE VARCHAR(255),
-	COVER VARCHAR(255),
+	IMAGE TEXT,
+	COVER TEXT,
 	BIO TEXT,
 	TOTAL_FOLLOWERS BIGINT,
 	PHONE BIGINT UNIQUE,
@@ -30,6 +37,8 @@ CREATE TABLE client.users (
 	COUNTRY VARCHAR(10) NOT NULL,
 	THEME_HEX VARCHAR(50),
 	ROLE VARCHAR(50) NOT NULL,
+	DOMAIN VARCHAR(255) DEFAULT NULL,
+	OAUTH_ID TEXT DEFAULT NULL UNIQUE,
 	PRIVATE BOOL DEFAULT TRUE,
 	VERIFIED BOOL,
 	CONFIRMED BOOL,
@@ -38,11 +47,22 @@ CREATE TABLE client.users (
 	UPDATED_AT DATE NOT NULL DEFAULT CURRENT_DATE
 );
 
+-- Token table
+CREATE TABLE client.token (
+	ID BIGSERIAL PRIMARY KEY NOT NULL,
+	KIND VARCHAR(255) NOT NULL,
+	ACCESS_TOKEN TEXT NOT NULL,
+	REFRESH_TOKEN TEXT DEFAULT NULL,
+	FK_USER BIGSERIAL NOT NULL REFERENCES CLIENT.USERS(ID) ON DELETE CASCADE,
+	CREATED_AT DATE NOT NULL DEFAULT CURRENT_DATE,
+	UPDATED_AT DATE NOT NULL DEFAULT CURRENT_DATE
+);
+
 -- Insert fake user data
 INSERT INTO client.users (USERNAME, PASSWORD, EMAIL, NAME, SURNAME, BIO, TOTAL_FOLLOWERS, PHONE, CITY, COUNTRY, THEME_HEX, CREATED_AT, ROLE,
 				  PRIVATE, VERIFIED, CONFIRMED, ACTIVE) 
 VALUES (
-	'aruizmx', 'caca123', 'luis.alonso.16@hotmail.com', 'Alonso', 'R', 'Entrepreneur', 
+	'aruizmx', 'caca123', 'luisruizhalo@hotmail.com', 'Alonso', 'R', 'Entrepreneur', 
 	1452690, 526141592623, 'Chihuahua', 'mx', '01579b', '2019-06-01', 'ROLE_ADMIN', FALSE, TRUE,
 	TRUE, TRUE
 ), (
@@ -61,8 +81,8 @@ VALUES (
 
 -- Followers table
 CREATE TABLE client.user_followers (
-	FK_USER BIGSERIAL NOT NULL REFERENCES CLIENT.USERS(ID),
-	FK_FOLLOWER BIGSERIAL NOT NULL REFERENCES CLIENT.USERS(ID)
+	FK_USER BIGSERIAL NOT NULL REFERENCES CLIENT.USERS(ID) ON DELETE CASCADE,
+	FK_FOLLOWER BIGSERIAL NOT NULL REFERENCES CLIENT.USERS(ID) ON DELETE CASCADE
 );
 
 -- Insert fake follower data
@@ -87,7 +107,7 @@ CREATE TABLE client.messages (
 	CONTENT TEXT NOT NULL,
 	IAT DATE DEFAULT CURRENT_DATE,
 	READ BOOL,
-	FK_CHAT BIGSERIAL NOT NULL REFERENCES CLIENT.CHATS(ID)
+	FK_CHAT BIGSERIAL NOT NULL REFERENCES CLIENT.CHATS(ID) ON DELETE CASCADE
 );
 
 -- Company table
@@ -108,15 +128,15 @@ CREATE TABLE client.place (
 	PHONE BIGINT,
 	BIO TEXT,
 	WEBSITE VARCHAR(255),
-	IMAGE VARCHAR(255),
-	COVER VARCHAR(255),
+	IMAGE TEXT,
+	COVER TEXT,
 	TOTAL_FOLLOWERS BIGINT,
 	COVER_CHARGE REAL DEFAULT 0.0,
 	LOCATION VARCHAR(255),
 	CITY VARCHAR(255),
 	COUNTRY VARCHAR(10) NOT NULL,
 	THEME_HEX VARCHAR(50),
-	FK_COMPANY BIGSERIAL NOT NULL REFERENCES ENTERPRISE.COMPANY(ID),
+	FK_COMPANY BIGSERIAL NOT NULL REFERENCES ENTERPRISE.COMPANY(ID) ON DELETE CASCADE,
 	LOCK_STOCK BOOL,
 	VERIFIED BOOL,
 	ACTIVE BOOL,
@@ -160,3 +180,22 @@ $$
 LANGUAGE SQL;
 
 SELECT * FROM client.user_by_followers();
+
+-- OAuth2 clients
+CREATE TABLE auth.client (
+	NAME VARCHAR(255) UNIQUE NOT NULL,
+	ID TEXT NOT NULL,
+	SECRET TEXT NOT NULL,
+	CREATED_AT DATE NOT NULL DEFAULT CURRENT_DATE,
+	UPDATED_AT DATE NOT NULL DEFAULT CURRENT_DATE
+);
+
+-- OAuth2 authorization codes
+CREATE TABLE auth.codes (
+	VALUE TEXT NOT NULL,
+	REDIRECT_URI TEXT NOT NULL,
+	USER_ID BIGSERIAL NOT NULL,
+	CLIENT_ID TEXT NOT NULL,
+	CREATED_AT DATE NOT NULL DEFAULT CURRENT_DATE,
+	UPDATED_AT DATE NOT NULL DEFAULT CURRENT_DATE
+);
