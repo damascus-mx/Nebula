@@ -20,6 +20,7 @@ import { IAuthService } from '../../core/services/auth.interface';
 import { ITokenRepository } from '../../core/repositories/token.repository';
 import { IPassportConfig } from '../../core/config/passport.interface';
 import { IStorageHelper } from '../../core/helpers/storage.helper';
+import { IS3Helper } from '../../core/helpers/s3.interface';
 
 
 // Implementations
@@ -31,6 +32,7 @@ import { AuthService } from '../../services/auth.service';
 import { TokenRepository } from '../../infrastructure/repositories/token.repository';
 import { PassportConfig } from './passport.config';
 import StorageHelper from '../helpers/storage.helper';
+import S3Helper from '../helpers/s3.helper';
 
 
 const nebulaContainer = new Container();
@@ -41,6 +43,7 @@ nebulaContainer.bind<IAuthService>(TYPES.AuthService).to(AuthService);
 nebulaContainer.bind<IUserService>(TYPES.UserService).to(UserService);
 nebulaContainer.bind<ITokenRepository>(TYPES.TokenReposity).to(TokenRepository);
 nebulaContainer.bind<IUserRepository>(TYPES.UserRepository).to(UserRepository);
-nebulaContainer.bind<IStorageHelper>(TYPES.StorageHelper).to(StorageHelper)
+nebulaContainer.bind<IStorageHelper>(TYPES.StorageHelper).to(StorageHelper);
+nebulaContainer.bind<IS3Helper>(TYPES.S3Helper).to(S3Helper).inSingletonScope();
 
 export { nebulaContainer };

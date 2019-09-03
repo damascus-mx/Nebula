@@ -32,16 +32,17 @@ api.route('/account/user').post(controller.LogIn);
 api.route('/account/user/:id').put(isAuthenticated, controller.ChangePassword);
 api.route('/account/password/:id').put(controller.ForceChangePassword);
 
-api.route('/support/account/user').post(isAuthenticated, isInRole(['ROLE_ADMIN', 'ROLE_SUPPORT']), controller.ForceSignIn);
-
 // User related
 api.route('/testing/user').get(isAuthenticated, isInRole(['ROLE_USER']), controller.GetAll);
-api.route('/account/io/profilepic').post(controller.UploadProfilePicture);
+api.route('/account/io/profilepic').post(isAuthenticated, controller.UploadProfilePicture);
 
 // - OAuth2
 api.route('/connect/facebook').get(controller.Facebook);
 api.route('/connect/facebook/callback').get(controller.FacebookCallback);
 api.route('/connect/google').get(controller.Google);
 api.route('/connect/google/callback').get(controller.GoogleCallback);
+
+// Admin - Support
+api.route('/support/account/user').post(isAuthenticated, isInRole(['ROLE_ADMIN', 'ROLE_SUPPORT']), controller.ForceSignIn);
 
 export default api;

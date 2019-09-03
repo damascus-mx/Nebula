@@ -17,7 +17,8 @@ const TYPES = {
     MailHelper: Symbol.for('MailHelper'),
     AuthService: Symbol.for('AuthService'),
     PassportConfig: Symbol.for('PassportConfig'),
-    StorageHelper: Symbol.for('StorageHelper')
+    StorageHelper: Symbol.for('StorageHelper'),
+    S3Helper: Symbol.for('S3Helper')
 }
 
 export { TYPES };

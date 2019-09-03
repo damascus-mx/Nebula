@@ -8,7 +8,7 @@
  * @description Handles all user operations
  */
 
-import { NOT_FOUND, APP_NAME, EMAIL_SUPPORT, FILE_ERROR, FILE_INVALID_EXTENSION } from "../common/config/app.config";
+import { NOT_FOUND, APP_NAME, EMAIL_SUPPORT, FILE_ERROR, FILE_INVALID_EXTENSION, FILE_DELETE_ERROR } from "../common/config/app.config";
 
 // Interfaces
 import IUserRepository from "../core/repositories/user.repository";
@@ -16,44 +16,39 @@ import { IUser } from "../domain/models/user.model";
 import IUserService from "../core/services/user.interface";
 import { IMailHelper } from "../core/helpers/mail.interface";
 import { IAuthService } from "../core/services/auth.interface";
-import { IStorageHelper } from "../core/helpers/storage.helper";
+import { IS3Helper } from "../core/helpers/s3.interface";
 
 // Misc
 import { injectable, inject } from "inversify";
 import { TYPES } from "../common/config/types";
 import { Request } from "express";
-import enviroment from '../common/config';
 
 // Formidable - File uploading
-import path from 'path';
-import formidable, { File } from 'formidable';
-import rootpath from 'app-root-path';
-import uuid from 'uuid/v4';
-import sharp from 'sharp';
-import AWS from 'aws-sdk';
+import formidable from 'formidable';
 
 // Auth
 // - Cryptographic
 import bcrypt from 'bcryptjs';
 import { Sequelize } from 'sequelize';
+import { ContentLocationEnum } from "../common/enums/contentlocation.enum";
 
 @injectable()
 export default class UserService implements IUserService {
     private static _userRepository: IUserRepository;
     private static _mailHelper: IMailHelper;
     private static _authService: IAuthService;
-    private static _storageHelper: IStorageHelper;
+    private static _s3Helper: IS3Helper
 
     constructor(
         @inject(TYPES.UserRepository) userRepository: IUserRepository,
         @inject(TYPES.MailHelper) mailHelper: IMailHelper,
         @inject(TYPES.AuthService) authService: IAuthService,
-        @inject(TYPES.StorageHelper) storageHelper: IStorageHelper
+        @inject(TYPES.S3Helper) s3Helper: IS3Helper
     ) {
         UserService._userRepository = userRepository;
         UserService._mailHelper = mailHelper;
         UserService._authService = authService;
-        UserService._storageHelper = storageHelper;
+        UserService._s3Helper = s3Helper;
     }
 
     async create(payload: any): Promise<IUser> {
@@ -173,64 +168,27 @@ export default class UserService implements IUserService {
         }
     }
 
-    async uploadProfilePicture(req: Request): Promise<any> {
+    async uploadProfilePicture(req: Request): Promise<string> {
         try {
             // Formidable
             const form = new formidable.IncomingForm();
-            form.encoding = 'utf-8';
 
-            // File size
-            const mbToBytes: number = 1024 * 1024;
-            const maxFileSize: number = 2 * mbToBytes;
-            form.maxFieldsSize = maxFileSize;
+            const user = await UserService._userRepository.GetById(req.user.id);
 
-            // Init folder
-            const uploadDir = `${rootpath.path}/uploads/users`;
-            const createdFolder = await UserService._storageHelper.createDirectory(`${rootpath.path}/uploads`)
-            .then(result => UserService._storageHelper.createDirectory(`${rootpath.path}/uploads/users`)).catch(e => null);
-    
-            form.parse(req);
-            const extensions: Array<string> = ['.jpg', '.png', '.jpeg'];
-            
-            const localFile: File = await new Promise( (resolve: any, reject: any) => {
-
-                try {
-                    form.on('fileBegin', (name, file: File) => {
-                        const extension = path.extname(file.name).toLowerCase();
-                        if (extensions.indexOf(extension) == -1) return form.emit('error', (FILE_INVALID_EXTENSION));
-                        
-                        file.path = `${uploadDir}/${file.name}`;
-                    });
-    
-                    form.on('file', (name, file: File) => {
-                        resolve(file);
-                    });
-
-                    form.on('error', (message: string) => {
-                        reject(new Error(message));
-                    });
-                } catch (error) {
-                    reject(error);
-                }
-            });
+            if ( user.image ) {
+                const userImage = user.image.split('/');
+                UserService._s3Helper.deleteFile(userImage[userImage.length - 1], ContentLocationEnum.USER).then(data => {
+                    if (!data) {
+                        throw new Error(FILE_DELETE_ERROR);
+                    }
+                }).catch(e => e);
+            }
 
 
-            const newFileName = `${uuid()}${path.extname(localFile.name)}`;
-            const sharpedImage = await sharp(`${uploadDir}/${localFile.name}`).resize(250, 250).toBuffer(); // .toFile(`${uploadDir}/${newFileName}`);
-            
-            const deleteFile = await UserService._storageHelper.deleteFile(`${uploadDir}/${localFile.name}`);
+            const s3URL = await UserService._s3Helper.uploadImage(form, req, 2, ContentLocationEnum.USER, 250);
+            const userUpdated = await UserService._userRepository.Update(req.user.id, { image: s3URL });
 
-            const S3 = new AWS.S3({accessKeyId: enviroment.aws.S3_ACCESS_KEY, secretAccessKey: enviroment.aws.S3_SECRET_KEY, region: enviroment.aws.S3_CDN_REGION });
-            const upload = await S3.upload({
-                Bucket: 'cdn.damascus-engineering.com/andromeda/users',
-                Key: newFileName,
-                Body: sharpedImage,
-                ContentType: localFile.type
-            });
-
-            const data: AWS.S3.ManagedUpload.SendData = await upload.promise().then(data => data).catch(e => e);
-
-            return data.Location;
+            return s3URL;
             
         } catch (error) {
             throw error;

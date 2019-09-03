@@ -171,7 +171,6 @@ export class UserController implements IUserController {
     /**
      *  Formidable endpoints (File uploading)
      */
-
     
     async UploadProfilePicture(req: Request, res: Response) {
         try {
