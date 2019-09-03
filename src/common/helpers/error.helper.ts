@@ -9,13 +9,16 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
+import { GENERIC_ERROR } from '../config/app.config';
 
 export default (err: Error, req: Request, res: Response, next: NextFunction) => {
+
+    if (!err) next();
+
     switch(err.name) {
         case 'UnauthorizedError':
             return res.status(401).send({message: err.message});
-        
+        default:
+            return res.status(403).send({message: GENERIC_ERROR});
     }
-
-    next();
 }

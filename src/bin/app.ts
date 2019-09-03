@@ -9,7 +9,7 @@
  */
 
 // Required libs
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import compression  from 'compression';
 import * as bodyParser from 'body-parser';
 import morgan from 'morgan';
@@ -23,6 +23,7 @@ import passport from "passport";
 import { nebulaContainer } from '../common/config/inversify.config';
 import { IPassportConfig } from '../core/config/passport.interface';
 import { TYPES } from '../common/config/types';
+import ErrorHelper from '../common/helpers/error.helper';
 
 // Const
 const app = express();
@@ -69,5 +70,8 @@ app.use((req, res, next) => {
 
 // Routes
 app.use(Routes);
+
+// Express-JWT
+app.use(ErrorHelper);
 
 export default app;
