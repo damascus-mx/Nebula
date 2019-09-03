@@ -1,19 +1,35 @@
+/**
+ * @name Nebula
+ * @version 0.0.1a
+ * @copyright Damascus Engineering. 2019 All rights reserved.
+ * @license Confidential This file belongs to Damascus Engineering intellectual property,
+ * any unauthorized distribution of this file will be punished by law.
+ * @author Alonso Ruiz
+ * @description Start & configure dependencies
+ */
+
 // Required libs
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import compression  from 'compression';
 import * as bodyParser from 'body-parser';
 import morgan from 'morgan';
 import * as rfs from 'rotating-file-stream';
 import * as fs from 'fs';
 import * as path from 'path';
+import lusca from "lusca";
+import passport from "passport";
+
 // Custom libs
+import { nebulaContainer } from '../common/config/inversify.config';
+import { IPassportConfig } from '../core/config/passport.interface';
+import { TYPES } from '../common/config/types';
+import ErrorHelper from '../common/helpers/error.helper';
 
 // Const
 const app = express();
-const API_ROUTE = '/api/v1';
 
 // Routes import
-import { UserRoutes } from '../routes/user.routes';
+import Routes from '../routes';
 
 // Gzip compression
 app.use(compression());
@@ -33,6 +49,14 @@ const accessLogStream = rfs.default(
 );
 app.use(morgan("combined", { stream: accessLogStream }));
 
+// Passport Auth
+app.use(passport.initialize());
+const passportConfig: IPassportConfig = nebulaContainer.get<IPassportConfig>(TYPES.PassportConfig);
+
+// LUSCA
+app.use(lusca.xframe("SAMEORIGIN"));
+app.use(lusca.xssProtection(true));
+
 // CORS
 // TODO - Change public policy to AWS Cloudfront/VPC
 app.use((req, res, next) => {
@@ -45,6 +69,9 @@ app.use((req, res, next) => {
 });
 
 // Routes
-app.use(API_ROUTE, UserRoutes);
+app.use(Routes);
+
+// Express-JWT
+app.use(ErrorHelper);
 
 export default app;

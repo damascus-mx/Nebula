@@ -65,3 +65,6 @@ typings/
 
 # generated babel dist
 dist/
+
+# Resource uploads
+uploads/
