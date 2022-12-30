@@ -80,7 +80,7 @@
     "@types/uuid": "^3.4.5",
     "@types/validator": "^10.11.2",
     "chai": "^4.2.0",
-    "mocha": "^6.2.0",
+    "mocha": "^10.2.0",
     "mocha-junit-reporter": "^1.23.1",
     "morgan": "^1.9.1",
     "nodemon": "^1.19.1",
